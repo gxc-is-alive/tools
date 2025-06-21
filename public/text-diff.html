@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文本比对工具 - 在线工具箱</title>
+    <link rel="stylesheet" href="text-diff-style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <a href="/" class="back-link"><i class="fas fa-arrow-left"></i> 返回工具箱</a>
+            <h1><i class="fas fa-file-alt"></i> 文本比对工具</h1>
+            <p>输入两段文本，立即查看差异</p>
+        </header>
+
+        <main>
+            <div class="diff-container">
+                <div class="input-panel">
+                    <h3>原始文本</h3>
+                    <textarea id="text1" placeholder="在此处粘贴第一段文本..."></textarea>
+                </div>
+                <div class="input-panel">
+                    <h3>对比文本</h3>
+                    <textarea id="text2" placeholder="在此处粘贴第二段文本..."></textarea>
+                </div>
+            </div>
+            <div class="actions">
+                <button id="compareBtn"><i class="fas fa-exchange-alt"></i> 开始比对</button>
+            </div>
+            <div class="result-container" id="resultContainer">
+                <h3>比对结果</h3>
+                <div id="diffOutput"></div>
+            </div>
+        </main>
+    </div>
+
+    <!-- 引入 diff.js 库 (修正CDN链接) -->
+    <script src="https://cdn.jsdelivr.net/npm/diff@5.1.0/dist/diff.min.js"></script>
+    <script src="text-diff-script.js"></script>
+</body>
+</html> 

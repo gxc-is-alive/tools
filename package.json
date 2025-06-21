@@ -1,0 +1,47 @@
+{
+  "name": "webp-converter",
+  "version": "1.0.0",
+  "description": "批量图片转WebP格式工具",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "NODE_ENV=production node server.js",
+    "dev": "concurrently \"pnpm run dev:client\" \"pnpm run dev:server\"",
+    "dev:client": "vite",
+    "dev:server": "nodemon server.js",
+    "build": "vite build",
+    "preview": "vite preview",
+    "client:dev": "vite",
+    "client:build": "vite build",
+    "serve": "node server.js"
+  },
+  "dependencies": {
+    "archiver": "^6.0.1",
+    "axios": "^1.10.0",
+    "cors": "^2.8.5",
+    "diff": "^8.0.2",
+    "express": "^4.18.2",
+    "form-data": "^4.0.3",
+    "multer": "^1.4.5-lts.1",
+    "node-fetch": "^2.7.0",
+    "sharp": "^0.32.6",
+    "vue": "^3.3.8",
+    "vue-router": "^4.2.5"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^4.4.0",
+    "concurrently": "^9.1.2",
+    "nodemon": "^3.0.1",
+    "vite": "^4.4.11"
+  },
+  "keywords": [
+    "webp",
+    "image",
+    "converter",
+    "batch",
+    "vue3",
+    "vite"
+  ],
+  "author": "",
+  "license": "MIT"
+}

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>时间戳转换工具 - 在线工具箱</title>
+    <link rel="stylesheet" href="timestamp-style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <a href="/" class="back-link"><i class="fas fa-arrow-left"></i> 返回工具箱</a>
+            <h1><i class="fas fa-clock"></i> 时间戳转换工具</h1>
+            <p>输入任意格式的时间，立即查看所有转换结果</p>
+        </header>
+
+        <main>
+            <div class="input-section">
+                <input type="text" id="mainInput" placeholder="输入时间戳或日期字符串...">
+                <button id="nowBtn" title="设为当前时间"><i class="fas fa-sync-alt"></i></button>
+            </div>
+
+            <div class="results-panel">
+                <div class="result-item">
+                    <span class="label">时间戳 (秒)</span>
+                    <span class="value" id="tsSeconds"></span>
+                    <button class="copy-btn" data-target="tsSeconds"><i class="far fa-copy"></i></button>
+                </div>
+                <div class="result-item">
+                    <span class="label">时间戳 (毫秒)</span>
+                    <span class="value" id="tsMilliseconds"></span>
+                    <button class="copy-btn" data-target="tsMilliseconds"><i class="far fa-copy"></i></button>
+                </div>
+                <div class="result-item">
+                    <span class="label">标准格式 (本地)</span>
+                    <span class="value" id="localTime"></span>
+                    <button class="copy-btn" data-target="localTime"><i class="far fa-copy"></i></button>
+                </div>
+                <div class="result-item">
+                    <span class="label">UTC/GMT 时间</span>
+                    <span class="value" id="utcTime"></span>
+                    <button class="copy-btn" data-target="utcTime"><i class="far fa-copy"></i></button>
+                </div>
+                 <div class="result-item">
+                    <span class="label">ISO 8601 格式</span>
+                    <span class="value" id="isoTime"></span>
+                    <button class="copy-btn" data-target="isoTime"><i class="far fa-copy"></i></button>
+                </div>
+                <div class="result-item">
+                    <span class="label">相对时间</span>
+                    <span class="value" id="relativeTime"></span>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1.11.9/dayjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1.11.9/plugin/relativeTime.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1.11.9/locale/zh-cn.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1.11.9/plugin/utc.js"></script>
+    <script src="timestamp-script.js"></script>
+</body>
+</html> 

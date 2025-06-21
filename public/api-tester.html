@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API请求测试 - 在线工具箱</title>
+    <link rel="stylesheet" href="api-tester-style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- For Syntax Highlighting -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-dark.min.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <a href="/" class="back-link"><i class="fas fa-arrow-left"></i> 返回工具箱</a>
+            <h1><i class="fas fa-paper-plane"></i> API 请求测试</h1>
+            <p>一个轻量级的在线HTTP请求客户端</p>
+        </header>
+
+        <div class="main-container">
+            <aside class="history-panel">
+                <h3><i class="fas fa-history"></i> 请求历史</h3>
+                <ul id="historyList"></ul>
+                <button id="clearHistoryBtn">清空历史</button>
+            </aside>
+
+            <main>
+                <div class="request-panel">
+                    <div class="url-bar">
+                        <select id="methodSelect">
+                            <option value="GET">GET</option>
+                            <option value="POST">POST</option>
+                            <option value="PUT">PUT</option>
+                            <option value="PATCH">PATCH</option>
+                            <option value="DELETE">DELETE</option>
+                            <option value="HEAD">HEAD</option>
+                            <option value="OPTIONS">OPTIONS</option>
+                        </select>
+                        <input type="text" id="urlInput" placeholder="https://api.example.com/data">
+                        <button id="sendBtn">发送</button>
+                    </div>
+
+                    <div class="tabs">
+                        <button class="tab-link active" data-tab="params">查询参数</button>
+                        <button class="tab-link" data-tab="headers">请求头</button>
+                        <button class="tab-link" data-tab="body">请求体</button>
+                    </div>
+
+                    <div class="tab-content" id="params">
+                        <div id="paramsContainer" class="key-value-pairs"></div>
+                        <button id="addParamBtn" class="add-btn"><i class="fas fa-plus"></i> 添加参数</button>
+                    </div>
+                    <div class="tab-content" id="headers" style="display: none;">
+                        <div id="headersContainer" class="key-value-pairs"></div>
+                        <button id="addHeaderBtn" class="add-btn"><i class="fas fa-plus"></i> 添加请求头</button>
+                    </div>
+                    <div class="tab-content" id="body" style="display: none;">
+                        <div class="body-type-selector">
+                            <label><input type="radio" name="body-type" value="none" checked> None</label>
+                            <label><input type="radio" name="body-type" value="form-data"> form-data</label>
+                            <label><input type="radio" name="body-type" value="json"> JSON</label>
+                        </div>
+
+                        <div id="body-content-json">
+                            <textarea id="bodyTextarea" placeholder="请求体 (例如: JSON)"></textarea>
+                        </div>
+                        <div id="body-content-form-data" style="display: none;">
+                            <div id="formDataContainer" class="key-value-pairs"></div>
+                            <button id="addFormDataBtn" class="add-btn"><i class="fas fa-plus"></i> 添加表单项</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="response-panel" id="responsePanel" style="display: none;">
+                    <div class="response-header">
+                        <h3>响应</h3>
+                        <div class="response-meta">
+                            <span>状态: <strong id="statusText" class="status-code"></strong></span>
+                            <span>时间: <strong id="timeText"></strong></span>
+                            <span>大小: <strong id="sizeText"></strong></span>
+                        </div>
+                    </div>
+                    <div class="response-tabs">
+                        <button class="response-tab-link active" data-tab="response-body">响应体</button>
+                        <button class="response-tab-link" data-tab="response-headers">响应头</button>
+                    </div>
+                    <div class="response-tab-content" id="response-body">
+                        <pre><code id="responseBody" class="language-json"></code></pre>
+                    </div>
+                    <div class="response-tab-content" id="response-headers" style="display: none;">
+                        <pre><code id="responseHeaders"></code></pre>
+                    </div>
+                </div>
+                <div id="loadingIndicator" style="display: none;">
+                    <i class="fas fa-spinner fa-spin"></i>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+    <script src="api-tester-script.js"></script>
+</body>
+</html> 

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebP图片转换器</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-images"></i> WebP图片转换器</h1>
+            <p>批量上传图片，一键转换为WebP格式</p>
+        </header>
+
+        <main>
+            <!-- 上传区域 -->
+            <div class="upload-section">
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-content">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <h3>拖拽图片到这里或点击选择</h3>
+                        <p>支持 JPG、PNG、GIF、BMP 等格式</p>
+                        <p>最大文件大小：10MB，最多20张图片</p>
+                        <input type="file" id="fileInput" multiple accept="image/*" style="display: none;">
+                        <button class="select-btn" onclick="document.getElementById('fileInput').click()">
+                            <i class="fas fa-folder-open"></i> 选择图片
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 设置区域 -->
+            <div class="settings-section">
+                <h3><i class="fas fa-cog"></i> 转换设置</h3>
+                <div class="setting-item">
+                    <label for="quality">WebP质量：</label>
+                    <input type="range" id="quality" min="1" max="100" value="80">
+                    <span id="qualityValue">80%</span>
+                </div>
+                <div class="quality-info">
+                    <span class="low">低质量 (1-30)</span>
+                    <span class="medium">中等 (31-70)</span>
+                    <span class="high">高质量 (71-100)</span>
+                </div>
+            </div>
+
+            <!-- 文件列表 -->
+            <div class="file-list-section" id="fileListSection" style="display: none;">
+                <h3><i class="fas fa-list"></i> 待转换文件</h3>
+                <div class="file-list" id="fileList"></div>
+                <div class="action-buttons">
+                    <button class="convert-btn" id="convertBtn">
+                        <i class="fas fa-magic"></i> 开始转换
+                    </button>
+                    <button class="clear-btn" id="clearBtn">
+                        <i class="fas fa-trash"></i> 清空列表
+                    </button>
+                </div>
+            </div>
+
+            <!-- 转换结果 -->
+            <div class="results-section" id="resultsSection" style="display: none;">
+                <h3><i class="fas fa-check-circle"></i> 转换结果</h3>
+                <div class="results-list" id="resultsList"></div>
+                <div class="download-actions">
+                    <button class="download-all-btn" id="downloadAllBtn">
+                        <i class="fas fa-download"></i> 批量下载所有文件
+                    </button>
+                    <button class="clean-btn" id="cleanBtn">
+                        <i class="fas fa-broom"></i> 清理文件
+                    </button>
+                </div>
+            </div>
+
+            <!-- 进度条 -->
+            <div class="progress-section" id="progressSection" style="display: none;">
+                <h3><i class="fas fa-spinner fa-spin"></i> 正在转换...</h3>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <p id="progressText">准备中...</p>
+            </div>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html> 
