@@ -8,36 +8,9 @@
     </div>
 
     <div class="content-wrapper">
-      <header class="hero-section">
-        <div class="hero-content">
-          <h1 class="hero-title">
-            <span class="title-icon">🛠️</span>
-            在线工具箱
-          </h1>
-          <p class="hero-subtitle">一个集成了多种实用工具的在线平台，让工作更高效</p>
-          <div class="hero-stats">
-            <div class="stat-item">
-              <span class="stat-number">5</span>
-              <span class="stat-label">实用工具</span>
-            </div>
-            <div class="stat-item">
-              <span class="stat-number">100%</span>
-              <span class="stat-label">免费使用</span>
-            </div>
-            <div class="stat-item">
-              <span class="stat-number">24/7</span>
-              <span class="stat-label">在线服务</span>
-            </div>
-          </div>
-        </div>
-      </header>
+      <SearchBar />
 
       <main class="tools-section">
-        <div class="section-header">
-          <h2>选择工具</h2>
-          <p>点击下方卡片开始使用您需要的工具</p>
-        </div>
-
         <div class="tools-grid">
           <div 
             v-for="tool in tools" 
@@ -84,6 +57,7 @@
 import { computed } from 'vue';
 import { useRouter } from 'vue-router';
 import SiteStatusChecker from '../components/SiteStatusChecker.vue';
+import SearchBar from '../components/SearchBar.vue';
 
 const router = useRouter();
 
