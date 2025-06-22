@@ -105,10 +105,7 @@ onMounted(() => {
 
 <style scoped>
 .currency-converter {
-  position: fixed;
-  bottom: 100px; /* 调整位置，避免与SiteStatusChecker重叠 */
-  right: 30px;
-  z-index: 999;
+  position: relative;
 }
 
 .converter-toggle {

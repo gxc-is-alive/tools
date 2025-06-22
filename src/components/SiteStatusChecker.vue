@@ -185,10 +185,7 @@ onUnmounted(() => {
 
 <style scoped>
 .site-status-checker {
-  position: fixed;
-  bottom: 30px;
-  right: 30px;
-  z-index: 1000;
+  position: relative;
 }
 
 .checker-toggle {
@@ -245,19 +242,17 @@ onUnmounted(() => {
 
 .checker-panel {
   position: absolute;
-  bottom: 80px;
+  bottom: 70px;
   right: 0;
   width: 350px;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-  border: 1px solid #e2e8f0;
+  background-color: white;
+  border-radius: 15px;
+  box-shadow: 0 5px 25px rgba(0,0,0,0.2);
+  transform: translateY(20px) scale(0.95);
   opacity: 0;
   visibility: hidden;
-  transform: translateY(20px);
   transition: all 0.3s ease;
-  max-height: 500px;
-  overflow: hidden;
+  transform-origin: bottom right;
 }
 
 .site-status-checker.is-open .checker-panel {

@@ -1,0 +1,293 @@
+{
+  "sessions": [
+    {
+      "id": "session_1750572278816_ayemf8b7y",
+      "startTime": 1750572278826,
+      "ip": "::ffff:127.0.0.1",
+      "location": {
+        "country": "未知",
+        "region": "未知",
+        "city": "未知",
+        "lat": null,
+        "lon": null,
+        "isp": "未知",
+        "org": "未知",
+        "mobile": false,
+        "proxy": false,
+        "hosting": false
+      },
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36",
+      "screenResolution": "1920x1080",
+      "language": "zh-CN",
+      "pageViews": [
+        {
+          "timestamp": 1750572278826,
+          "page": "/",
+          "referrer": "http://localhost:3000/"
+        }
+      ],
+      "duration": 7548,
+      "endTime": 1750572286386
+    },
+    {
+      "id": "session_1750572288142_1pjrhvlfq",
+      "startTime": 1750572288163,
+      "ip": "::1",
+      "location": {
+        "country": "未知",
+        "region": "未知",
+        "city": "未知",
+        "lat": null,
+        "lon": null,
+        "isp": "未知",
+        "org": "未知",
+        "mobile": false,
+        "proxy": false,
+        "hosting": false
+      },
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36",
+      "screenResolution": "1920x1080",
+      "language": "zh-CN",
+      "pageViews": [
+        {
+          "timestamp": 1750572288163,
+          "page": "/",
+          "referrer": "http://localhost:3001/"
+        }
+      ],
+      "duration": 2750579,
+      "endTime": 1750575038748
+    },
+    {
+      "id": "test123",
+      "startTime": 1750572316073,
+      "ip": "::1",
+      "location": {
+        "country": "未知",
+        "region": "未知",
+        "city": "未知",
+        "lat": null,
+        "lon": null,
+        "isp": "未知",
+        "org": "未知",
+        "mobile": false,
+        "proxy": false,
+        "hosting": false
+      },
+      "userAgent": "test",
+      "screenResolution": "1920x1080",
+      "language": "zh-CN",
+      "pageViews": [
+        {
+          "timestamp": 1750572316073,
+          "page": "/",
+          "referrer": ""
+        }
+      ],
+      "duration": 0
+    },
+    {
+      "id": "session_1750575099252_x0elfdtoy",
+      "startTime": 1750575099256,
+      "ip": "::1",
+      "location": {
+        "country": "未知",
+        "region": "未知",
+        "city": "未知",
+        "lat": null,
+        "lon": null,
+        "isp": "未知",
+        "org": "未知",
+        "mobile": false,
+        "proxy": false,
+        "hosting": false
+      },
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36",
+      "screenResolution": "1920x1080",
+      "language": "zh-CN",
+      "pageViews": [
+        {
+          "timestamp": 1750575099256,
+          "page": "/",
+          "referrer": "http://localhost:3001/"
+        }
+      ],
+      "duration": 1140,
+      "endTime": 1750575100414
+    },
+    {
+      "id": "session_1750575102503_ou49y35sg",
+      "startTime": 1750575102507,
+      "ip": "::1",
+      "location": {
+        "country": "未知",
+        "region": "未知",
+        "city": "未知",
+        "lat": null,
+        "lon": null,
+        "isp": "未知",
+        "org": "未知",
+        "mobile": false,
+        "proxy": false,
+        "hosting": false
+      },
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36",
+      "screenResolution": "1920x1080",
+      "language": "zh-CN",
+      "pageViews": [
+        {
+          "timestamp": 1750575102507,
+          "page": "/",
+          "referrer": "http://localhost:3001/"
+        }
+      ],
+      "duration": 12087,
+      "endTime": 1750575114609
+    },
+    {
+      "id": "session_1750575115330_v64qdqad3",
+      "startTime": 1750575115331,
+      "ip": "::1",
+      "location": {
+        "country": "未知",
+        "region": "未知",
+        "city": "未知",
+        "lat": null,
+        "lon": null,
+        "isp": "未知",
+        "org": "未知",
+        "mobile": false,
+        "proxy": false,
+        "hosting": false
+      },
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36",
+      "screenResolution": "1920x1080",
+      "language": "zh-CN",
+      "pageViews": [
+        {
+          "timestamp": 1750575115331,
+          "page": "/",
+          "referrer": "http://localhost:3001/"
+        }
+      ],
+      "duration": 0
+    },
+    {
+      "id": "session_1750575118203_2r6twhtbu",
+      "startTime": 1750575118205,
+      "ip": "::1",
+      "location": {
+        "country": "未知",
+        "region": "未知",
+        "city": "未知",
+        "lat": null,
+        "lon": null,
+        "isp": "未知",
+        "org": "未知",
+        "mobile": false,
+        "proxy": false,
+        "hosting": false
+      },
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36",
+      "screenResolution": "1920x1080",
+      "language": "zh-CN",
+      "pageViews": [
+        {
+          "timestamp": 1750575118205,
+          "page": "/",
+          "referrer": "http://localhost:3001/"
+        }
+      ],
+      "duration": 2318,
+      "endTime": 1750575120542
+    },
+    {
+      "id": "session_1750575174635_i5qucgrt6",
+      "startTime": 1750575174640,
+      "ip": "::1",
+      "location": {
+        "country": "未知",
+        "region": "未知",
+        "city": "未知",
+        "lat": null,
+        "lon": null,
+        "isp": "未知",
+        "org": "未知",
+        "mobile": false,
+        "proxy": false,
+        "hosting": false
+      },
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36",
+      "screenResolution": "1920x1080",
+      "language": "zh-CN",
+      "pageViews": [
+        {
+          "timestamp": 1750575174640,
+          "page": "/",
+          "referrer": "http://localhost:3001/"
+        }
+      ],
+      "duration": 26882,
+      "endTime": 1750575201546
+    },
+    {
+      "id": "session_1750575202947_my2tfpdpt",
+      "startTime": 1750575202949,
+      "ip": "::1",
+      "location": {
+        "country": "未知",
+        "region": "未知",
+        "city": "未知",
+        "lat": null,
+        "lon": null,
+        "isp": "未知",
+        "org": "未知",
+        "mobile": false,
+        "proxy": false,
+        "hosting": false
+      },
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36",
+      "screenResolution": "1920x1080",
+      "language": "zh-CN",
+      "pageViews": [
+        {
+          "timestamp": 1750575202949,
+          "page": "/",
+          "referrer": "http://localhost:3001/"
+        }
+      ],
+      "duration": 195186,
+      "endTime": 1750575398158
+    },
+    {
+      "id": "session_1750575403042_2ozw4q34e",
+      "startTime": 1750575403045,
+      "ip": "::1",
+      "location": {
+        "country": "未知",
+        "region": "未知",
+        "city": "未知",
+        "lat": null,
+        "lon": null,
+        "isp": "未知",
+        "org": "未知",
+        "mobile": false,
+        "proxy": false,
+        "hosting": false
+      },
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36",
+      "screenResolution": "1920x1080",
+      "language": "zh-CN",
+      "pageViews": [
+        {
+          "timestamp": 1750575403045,
+          "page": "/",
+          "referrer": "http://localhost:3001/"
+        }
+      ],
+      "duration": 134514,
+      "endTime": 1750575537580
+    }
+  ],
+  "lastUpdate": 1750575537580
+}

@@ -35,10 +35,6 @@ app.use(cors(corsOptions));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// 静态文件服务 - 优先服务Vue3构建文件
-app.use(express.static('dist'));
-app.use(express.static('public')); // 保留原有静态文件
-
 // 创建上传和输出目录
 const uploadDir = path.join(__dirname, 'uploads');
 const outputDir = path.join(__dirname, 'output');
@@ -529,6 +525,335 @@ app.post('/api/convert-to-webp', upload.array('images'), async (req, res) => {
         console.error('批量转换错误:', error);
         res.status(500).json({ error: '批量转换失败' });
     }
+});
+
+// 访问统计数据存储
+const statsDataPath = path.join(__dirname, 'data', 'visit_stats.json');
+const statsDir = path.dirname(statsDataPath);
+
+// 确保数据目录存在
+if (!fs.existsSync(statsDir)) {
+  fs.mkdirSync(statsDir, { recursive: true });
+}
+
+// 初始化统计数据文件
+if (!fs.existsSync(statsDataPath)) {
+  fs.writeFileSync(statsDataPath, JSON.stringify({
+    sessions: [],
+    lastUpdate: Date.now()
+  }));
+}
+
+// 读取统计数据
+function readStatsData() {
+  try {
+    const data = fs.readFileSync(statsDataPath, 'utf8');
+    return JSON.parse(data);
+  } catch (error) {
+    console.error('读取统计数据失败:', error);
+    return { sessions: [], lastUpdate: Date.now() };
+  }
+}
+
+// 保存统计数据
+function saveStatsData(data) {
+  try {
+    data.lastUpdate = Date.now();
+    fs.writeFileSync(statsDataPath, JSON.stringify(data, null, 2));
+  } catch (error) {
+    console.error('保存统计数据失败:', error);
+  }
+}
+
+// 获取真实IP地址
+function getRealIP(req) {
+  return req.headers['x-forwarded-for'] || 
+         req.headers['x-real-ip'] || 
+         req.connection.remoteAddress || 
+         req.socket.remoteAddress || 
+         req.ip || 
+         'unknown';
+}
+
+// 获取地理位置信息
+async function getLocationInfo(ip) {
+  try {
+    // 使用免费的IP地理位置API
+    const response = await fetch(`http://ip-api.com/json/${ip}?fields=status,message,country,regionName,city,lat,lon,isp,org,as,mobile,proxy,hosting,query`);
+    const data = await response.json();
+    
+    if (data.status === 'success') {
+      return {
+        country: data.country || '未知',
+        region: data.regionName || '未知',
+        city: data.city || '未知',
+        lat: data.lat,
+        lon: data.lon,
+        isp: data.isp || '未知',
+        org: data.org || '未知',
+        mobile: data.mobile || false,
+        proxy: data.proxy || false,
+        hosting: data.hosting || false
+      };
+    }
+  } catch (error) {
+    console.error('获取地理位置失败:', error);
+  }
+  
+  return {
+    country: '未知',
+    region: '未知',
+    city: '未知',
+    lat: null,
+    lon: null,
+    isp: '未知',
+    org: '未知',
+    mobile: false,
+    proxy: false,
+    hosting: false
+  };
+}
+
+// 访问统计API
+app.post('/api/stats/record', async (req, res) => {
+  try {
+    const { sessionId, page, userAgent, screenResolution, language } = req.body;
+    const ip = getRealIP(req);
+    const timestamp = Date.now();
+    
+    // 获取地理位置信息
+    const locationInfo = await getLocationInfo(ip);
+    
+    // 读取现有数据
+    const data = readStatsData();
+    
+    // 查找或创建会话
+    let session = data.sessions.find(s => s.id === sessionId);
+    if (!session) {
+      session = {
+        id: sessionId,
+        startTime: timestamp,
+        ip: ip,
+        location: locationInfo,
+        userAgent: userAgent,
+        screenResolution: screenResolution,
+        language: language,
+        pageViews: [],
+        duration: 0
+      };
+      data.sessions.push(session);
+    }
+    
+    // 添加页面访问记录
+    session.pageViews.push({
+      timestamp: timestamp,
+      page: page,
+      referrer: req.headers.referer || ''
+    });
+    
+    // 保存数据
+    saveStatsData(data);
+    
+    res.json({ success: true, message: '访问记录已保存' });
+  } catch (error) {
+    console.error('记录访问统计失败:', error);
+    res.status(500).json({ success: false, message: '服务器错误' });
+  }
+});
+
+// 更新会话时长
+app.put('/api/stats/session/:sessionId', (req, res) => {
+  try {
+    const { sessionId } = req.params;
+    const { duration } = req.body;
+    
+    const data = readStatsData();
+    const session = data.sessions.find(s => s.id === sessionId);
+    
+    if (session) {
+      session.duration = duration;
+      session.endTime = Date.now();
+      saveStatsData(data);
+      res.json({ success: true, message: '会话时长已更新' });
+    } else {
+      res.status(404).json({ success: false, message: '会话不存在' });
+    }
+  } catch (error) {
+    console.error('更新会话时长失败:', error);
+    res.status(500).json({ success: false, message: '服务器错误' });
+  }
+});
+
+// 获取统计数据
+app.get('/api/stats', (req, res) => {
+  try {
+    const { period = 30 } = req.query;
+    const days = parseInt(period);
+    const cutoff = Date.now() - (days * 24 * 60 * 60 * 1000);
+    
+    const data = readStatsData();
+    const filteredSessions = data.sessions.filter(session => 
+      session.startTime >= cutoff
+    );
+    
+    // 计算统计数据
+    const stats = {
+      totalVisits: filteredSessions.length,
+      uniqueIPs: new Set(filteredSessions.map(s => s.ip)).size,
+      uniqueRegions: new Set(filteredSessions.map(s => s.location.region)).size,
+      todayVisits: getTodayVisits(filteredSessions),
+      avgDuration: getAverageDuration(filteredSessions),
+      timeDistribution: getTimeDistribution(filteredSessions),
+      regionDistribution: getRegionDistribution(filteredSessions),
+      pageViews: getPageViews(filteredSessions),
+      deviceStats: getDeviceStats(filteredSessions),
+      locationStats: getLocationStats(filteredSessions)
+    };
+    
+    res.json({ success: true, data: stats });
+  } catch (error) {
+    console.error('获取统计数据失败:', error);
+    res.status(500).json({ success: false, message: '服务器错误' });
+  }
+});
+
+// 获取详细访问记录
+app.get('/api/stats/records', (req, res) => {
+  try {
+    const { period = 30, limit = 50 } = req.query;
+    const days = parseInt(period);
+    const recordLimit = parseInt(limit);
+    const cutoff = Date.now() - (days * 24 * 60 * 60 * 1000);
+    
+    const data = readStatsData();
+    const filteredSessions = data.sessions
+      .filter(session => session.startTime >= cutoff)
+      .sort((a, b) => b.startTime - a.startTime)
+      .slice(0, recordLimit);
+    
+    const records = filteredSessions.map((session, index) => ({
+      id: index + 1,
+      timestamp: session.startTime,
+      region: session.location.region,
+      city: session.location.city,
+      ip: session.ip,
+      page: session.pageViews[0]?.page || '首页',
+      duration: session.duration ? Math.round(session.duration / 1000) : 0,
+      userAgent: session.userAgent,
+      device: getDeviceInfo(session.userAgent)
+    }));
+    
+    res.json({ success: true, data: records });
+  } catch (error) {
+    console.error('获取访问记录失败:', error);
+    res.status(500).json({ success: false, message: '服务器错误' });
+  }
+});
+
+// 辅助函数
+function getTodayVisits(sessions) {
+  const today = new Date().setHours(0, 0, 0, 0);
+  return sessions.filter(session => session.startTime >= today).length;
+}
+
+function getAverageDuration(sessions) {
+  const validSessions = sessions.filter(s => s.duration);
+  if (validSessions.length === 0) return 0;
+  
+  const totalDuration = validSessions.reduce((sum, s) => sum + s.duration, 0);
+  return Math.round(totalDuration / validSessions.length / 1000 / 60);
+}
+
+function getTimeDistribution(sessions) {
+  const hourStats = new Array(24).fill(0);
+  sessions.forEach(session => {
+    const hour = new Date(session.startTime).getHours();
+    hourStats[hour]++;
+  });
+  return hourStats;
+}
+
+function getRegionDistribution(sessions) {
+  const regionStats = {};
+  sessions.forEach(session => {
+    const region = session.location.region;
+    regionStats[region] = (regionStats[region] || 0) + 1;
+  });
+  return regionStats;
+}
+
+function getPageViews(sessions) {
+  const pageStats = {};
+  sessions.forEach(session => {
+    session.pageViews.forEach(pageView => {
+      pageStats[pageView.page] = (pageStats[pageView.page] || 0) + 1;
+    });
+  });
+  return pageStats;
+}
+
+function getDeviceStats(sessions) {
+  const deviceStats = { desktop: 0, mobile: 0, tablet: 0 };
+  sessions.forEach(session => {
+    const device = getDeviceInfo(session.userAgent);
+    deviceStats[device]++;
+  });
+  return deviceStats;
+}
+
+function getLocationStats(sessions) {
+  const locationStats = {};
+  sessions.forEach(session => {
+    const country = session.location.country;
+    locationStats[country] = (locationStats[country] || 0) + 1;
+  });
+  return locationStats;
+}
+
+function getDeviceInfo(userAgent) {
+  if (!userAgent) return 'desktop';
+  
+  const ua = userAgent.toLowerCase();
+  if (ua.includes('mobile') || ua.includes('android') || ua.includes('iphone')) {
+    return 'mobile';
+  } else if (ua.includes('tablet') || ua.includes('ipad')) {
+    return 'tablet';
+  }
+  return 'desktop';
+}
+
+// 导出统计数据
+app.get('/api/stats/export', (req, res) => {
+  try {
+    const data = readStatsData();
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Content-Disposition', 'attachment; filename=visit_stats.json');
+    res.json(data);
+  } catch (error) {
+    console.error('导出统计数据失败:', error);
+    res.status(500).json({ success: false, message: '服务器错误' });
+  }
+});
+
+// 清除统计数据
+app.delete('/api/stats', (req, res) => {
+  try {
+    const emptyData = { sessions: [], lastUpdate: Date.now() };
+    saveStatsData(emptyData);
+    res.json({ success: true, message: '统计数据已清除' });
+  } catch (error) {
+    console.error('清除统计数据失败:', error);
+    res.status(500).json({ success: false, message: '服务器错误' });
+  }
+});
+
+// 静态文件服务 - 放在API路由之后
+app.use(express.static('dist'));
+app.use(express.static('public')); // 保留原有静态文件
+
+// 处理所有其他路由，返回index.html（SPA支持）
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'dist', 'index.html'));
 });
 
 app.listen(PORT, () => {

@@ -1,5 +1,5 @@
 <template>
-  <div class="home-container">
+  <div :class="['home-container', isTechTheme ? 'tech-theme' : '']">
     <!-- 背景装饰 -->
     <div class="background-decoration">
       <div class="floating-shape shape-1"></div>
@@ -37,8 +37,6 @@
         </div>
       </main>
 
-      <SiteStatusChecker />
-
       <footer class="footer-section">
         <div class="footer-content">
           <p>© 2024 在线工具箱 - 让工作更简单</p>
@@ -54,9 +52,8 @@
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { computed, ref, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
-import SiteStatusChecker from '../components/SiteStatusChecker.vue';
 import SearchBar from '../components/SearchBar.vue';
 
 const router = useRouter();
@@ -102,6 +99,40 @@ const tools = computed(() => [
 const navigateTo = (path) => {
   router.push(path);
 };
+
+// 主题状态
+const currentTheme = ref('default-theme');
+
+// 主题判断
+const isTechTheme = computed(() => {
+  return currentTheme.value === 'tech-theme';
+});
+
+// 监听主题变化
+function updateTheme() {
+  const theme = localStorage.getItem('theme') || 'default-theme';
+  currentTheme.value = theme;
+}
+
+// 监听 localStorage 变化
+function handleStorageChange(e) {
+  if (e.key === 'theme') {
+    updateTheme();
+  }
+}
+
+onMounted(() => {
+  updateTheme();
+  window.addEventListener('storage', handleStorageChange);
+  
+  // 监听自定义事件（用于同页面内的主题切换）
+  window.addEventListener('themeChanged', updateTheme);
+});
+
+onUnmounted(() => {
+  window.removeEventListener('storage', handleStorageChange);
+  window.removeEventListener('themeChanged', updateTheme);
+});
 </script>
 
 <style scoped>
@@ -110,6 +141,14 @@ const navigateTo = (path) => {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
   position: relative;
   overflow: hidden;
+}
+
+.home-container.tech-theme {
+  background: #0a1833;
+  background-image:
+    radial-gradient(circle at 20% 80%, #1e90ff 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, #00e0ff 0%, transparent 50%),
+    radial-gradient(circle at 40% 40%, #7f7fff 0%, transparent 50%);
 }
 
 .background-decoration {
@@ -127,6 +166,12 @@ const navigateTo = (path) => {
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.1);
   animation: float 6s ease-in-out infinite;
+}
+
+.home-container.tech-theme .floating-shape {
+  background: linear-gradient(135deg, #1e90ff, #00e0ff);
+  opacity: 0.18;
+  animation: techFloat 8s ease-in-out infinite;
 }
 
 .shape-1 {
@@ -158,6 +203,17 @@ const navigateTo = (path) => {
   50% { transform: translateY(-20px) rotate(180deg); }
 }
 
+@keyframes techFloat {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 0.18;
+  }
+  50% {
+    transform: translateY(-30px) rotate(180deg);
+    opacity: 0.35;
+  }
+}
+
 .content-wrapper {
   position: relative;
   z-index: 2;
@@ -172,6 +228,7 @@ const navigateTo = (path) => {
   color: white;
 }
 
+/* 科技风主题下的英雄区域 */
 .hero-content {
   max-width: 800px;
   margin: 0 auto;
@@ -189,17 +246,7 @@ const navigateTo = (path) => {
   flex-wrap: wrap;
 }
 
-.title-icon {
-  font-size: 3rem;
-  animation: bounce 2s infinite;
-}
-
-@keyframes bounce {
-  0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-  40% { transform: translateY(-10px); }
-  60% { transform: translateY(-5px); }
-}
-
+/* 科技风主题下的标题 */
 .hero-subtitle {
   font-size: 1.3rem;
   margin-bottom: 40px;
@@ -319,10 +366,6 @@ const navigateTo = (path) => {
   transition: transform 0.3s ease;
 }
 
-.tool-card:hover .tool-icon {
-  transform: scale(1.1) rotate(5deg);
-}
-
 .tool-icon i {
   font-size: 50px;
   background: linear-gradient(135deg, #667eea, #764ba2);
@@ -439,10 +482,6 @@ const navigateTo = (path) => {
   .hero-title {
     font-size: 3rem;
   }
-  
-  .title-icon {
-    font-size: 2.5rem;
-  }
 }
 
 @media (max-width: 768px) {
@@ -454,10 +493,6 @@ const navigateTo = (path) => {
     font-size: 2.5rem;
     flex-direction: column;
     gap: 10px;
-  }
-  
-  .title-icon {
-    font-size: 2.5rem;
   }
   
   .hero-subtitle {
@@ -537,10 +572,6 @@ const navigateTo = (path) => {
   }
   
   .hero-title {
-    font-size: 2rem;
-  }
-  
-  .title-icon {
     font-size: 2rem;
   }
   

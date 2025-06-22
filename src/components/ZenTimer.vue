@@ -178,11 +178,7 @@ onUnmounted(() => {
 
 <style scoped>
 .zen-timer-widget {
-  position: fixed;
-  bottom: 170px; /* Position above the other widgets */
-  right: 30px;
-  z-index: 998;
-  /* border: 5px solid red; --- Removing DEBUGGING BORDER --- */
+  position: relative;
 }
 
 .timer-toggle {
@@ -218,6 +214,7 @@ onUnmounted(() => {
   visibility: hidden;
   transition: all 0.3s ease;
   transform-origin: bottom right;
+  z-index: 10;
 }
 
 .zen-timer-widget.is-open .timer-panel {
