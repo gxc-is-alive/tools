@@ -1,7 +1,9 @@
 <template>
   <div class="currency-converter" :class="{ 'is-open': isOpen }">
-    <div class="converter-toggle" @click="togglePanel" title="澳元 -> 人民币汇率">
-      <i class="fas fa-coins"></i>
+    <div class="converter-toggle" @click="togglePanel" title="澳元 -> 人民币汇率" :class="rateColorClass">
+      <div v-if="isLoading" class="toggle-content">...</div>
+      <div v-else-if="error" class="toggle-content">!</div>
+      <div v-else class="toggle-content rate-text">{{ ratePrefix }}</div>
     </div>
 
     <div class="converter-panel">
@@ -45,18 +47,32 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { commonApi } from '../services/api';
 
 const isOpen = ref(false);
 const isLoading = ref(false);
-const rate = ref('N/A');
+const rate = ref(null);
 const lastUpdated = ref('N/A');
 const error = ref(null);
 
+const ratePrefix = computed(() => {
+  if (rate.value) {
+    return rate.value.toString().substring(0, 4);
+  }
+  return 'N/A';
+});
+
+const rateColorClass = computed(() => {
+  if (isLoading.value || error.value || !rate.value) {
+    return 'rate-neutral';
+  }
+  return parseFloat(rate.value) < 4.5 ? 'rate-red' : 'rate-green';
+});
+
 const togglePanel = () => {
   isOpen.value = !isOpen.value;
-  if (isOpen.value && rate.value === 'N/A') {
+  if (isOpen.value && (!rate.value || error.value)) {
     fetchRate();
   }
 };
@@ -69,22 +85,21 @@ const fetchRate = async () => {
   try {
     const response = await commonApi.getExchangeRate();
     if (response.success) {
-      rate.value = response.rate.toFixed(4);
+      rate.value = response.rate;
       lastUpdated.value = new Date(response.date).toLocaleString('zh-CN');
     } else {
       throw new Error(response.message || '获取汇率失败');
     }
   } catch (err) {
     error.value = err.message;
-    rate.value = 'Error';
+    rate.value = null;
   } finally {
     isLoading.value = false;
   }
 };
 
 onMounted(() => {
-  // 可以在挂载时自动获取一次，或者等待用户点击
-  // fetchRate();
+  fetchRate();
 });
 </script>
 
@@ -99,20 +114,41 @@ onMounted(() => {
 .converter-toggle {
   width: 60px;
   height: 60px;
-  background: linear-gradient(135deg, #1abc9c, #16a085);
-  color: white;
+  background: white;
+  color: #333;
+  border: 2px solid;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 24px;
+  font-size: 20px;
+  font-weight: bold;
   cursor: pointer;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.15);
   transition: all 0.3s ease;
 }
 
-.converter-toggle:hover {
-  transform: scale(1.1);
+.converter-toggle.rate-green {
+  border-color: #28a745;
+  color: #28a745;
+}
+
+.converter-toggle.rate-red {
+  border-color: #dc3545;
+  color: #dc3545;
+}
+
+.converter-toggle.rate-neutral {
+  border-color: #6c757d;
+  color: #6c757d;
+}
+
+.toggle-content {
+  line-height: 1;
+}
+
+.rate-text {
+  font-family: 'Roboto Mono', monospace;
 }
 
 .converter-panel {
