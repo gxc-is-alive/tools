@@ -478,8 +478,8 @@ body {
 /* 浮动操作按钮容器 */
 .fab-container {
   position: fixed;
-  bottom: 20px;
-  right: 20px;
+  bottom: 90px;
+  right: 30px;
   display: flex;
   flex-direction: column;
   align-items: flex-end;

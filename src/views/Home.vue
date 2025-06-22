@@ -437,12 +437,12 @@ onUnmounted(() => {
 }
 
 .footer-section {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
   padding: 30px 20px;
   text-align: center;
-  color: white;
+  position: relative;
+  z-index: 2;
   margin-top: auto;
+  color: white; /* 科技风下颜色可能需要调整 */
 }
 
 .footer-content {

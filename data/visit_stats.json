@@ -287,7 +287,151 @@
       ],
       "duration": 134514,
       "endTime": 1750575537580
+    },
+    {
+      "id": "session_1750575651083_f97eccv0h",
+      "startTime": 1750575651085,
+      "ip": "::1",
+      "location": {
+        "country": "未知",
+        "region": "未知",
+        "city": "未知",
+        "lat": null,
+        "lon": null,
+        "isp": "未知",
+        "org": "未知",
+        "mobile": false,
+        "proxy": false,
+        "hosting": false
+      },
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36",
+      "screenResolution": "1920x1080",
+      "language": "zh-CN",
+      "pageViews": [
+        {
+          "timestamp": 1750575651085,
+          "page": "/",
+          "referrer": "http://localhost:3001/"
+        }
+      ],
+      "duration": 240998,
+      "endTime": 1750575892123
+    },
+    {
+      "id": "session_1750575892490_5oxkp7xng",
+      "startTime": 1750575892502,
+      "ip": "::1",
+      "location": {
+        "country": "未知",
+        "region": "未知",
+        "city": "未知",
+        "lat": null,
+        "lon": null,
+        "isp": "未知",
+        "org": "未知",
+        "mobile": false,
+        "proxy": false,
+        "hosting": false
+      },
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36",
+      "screenResolution": "1920x1080",
+      "language": "zh-CN",
+      "pageViews": [
+        {
+          "timestamp": 1750575892502,
+          "page": "/",
+          "referrer": "http://localhost:3001/"
+        }
+      ],
+      "duration": 1236,
+      "endTime": 1750575893763
+    },
+    {
+      "id": "session_1750575895418_pl47idghz",
+      "startTime": 1750575895421,
+      "ip": "::1",
+      "location": {
+        "country": "未知",
+        "region": "未知",
+        "city": "未知",
+        "lat": null,
+        "lon": null,
+        "isp": "未知",
+        "org": "未知",
+        "mobile": false,
+        "proxy": false,
+        "hosting": false
+      },
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36",
+      "screenResolution": "1920x1080",
+      "language": "zh-CN",
+      "pageViews": [
+        {
+          "timestamp": 1750575895421,
+          "page": "/",
+          "referrer": "http://localhost:3001/"
+        }
+      ],
+      "duration": 63637,
+      "endTime": 1750575959075
+    },
+    {
+      "id": "session_1750575959441_wfy73qufz",
+      "startTime": 1750575959454,
+      "ip": "::1",
+      "location": {
+        "country": "未知",
+        "region": "未知",
+        "city": "未知",
+        "lat": null,
+        "lon": null,
+        "isp": "未知",
+        "org": "未知",
+        "mobile": false,
+        "proxy": false,
+        "hosting": false
+      },
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36",
+      "screenResolution": "1920x1080",
+      "language": "zh-CN",
+      "pageViews": [
+        {
+          "timestamp": 1750575959454,
+          "page": "/",
+          "referrer": "http://localhost:3001/"
+        }
+      ],
+      "duration": 1436,
+      "endTime": 1750575960904
+    },
+    {
+      "id": "session_1750575965171_y28r83qnk",
+      "startTime": 1750575965174,
+      "ip": "::1",
+      "location": {
+        "country": "未知",
+        "region": "未知",
+        "city": "未知",
+        "lat": null,
+        "lon": null,
+        "isp": "未知",
+        "org": "未知",
+        "mobile": false,
+        "proxy": false,
+        "hosting": false
+      },
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36",
+      "screenResolution": "1920x1080",
+      "language": "zh-CN",
+      "pageViews": [
+        {
+          "timestamp": 1750575965174,
+          "page": "/",
+          "referrer": "http://localhost:3001/"
+        }
+      ],
+      "duration": 0
     }
   ],
-  "lastUpdate": 1750575537580
+  "lastUpdate": 1750575966806
 }
