@@ -91,7 +91,7 @@ onMounted(() => {
 <style scoped>
 .currency-converter {
   position: fixed;
-  bottom: 100px; /* 调整位置，避免与另一个悬浮窗重叠 */
+  bottom: 100px; /* 调整位置，避免与SiteStatusChecker重叠 */
   right: 30px;
   z-index: 999;
 }
@@ -145,17 +145,32 @@ onMounted(() => {
   background-color: #f8f9fa;
   border-radius: 15px 15px 0 0;
 }
+
 .panel-header h4 {
   margin: 0;
   font-size: 1rem;
   font-weight: 600;
 }
+
 .panel-header .close-btn {
   background: none;
   border: none;
   font-size: 20px;
   cursor: pointer;
   color: #aaa;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.panel-header .close-btn:hover {
+  background: #e9ecef;
+  color: #333;
 }
 
 .panel-body {
@@ -165,39 +180,47 @@ onMounted(() => {
 .rate-display {
   text-align: center;
 }
+
 .rate-from, .rate-to {
   display: flex;
   align-items: center;
   justify-content: center;
   margin-bottom: 10px;
 }
+
 .currency-flag {
   font-size: 2rem;
   margin-right: 10px;
 }
+
 .currency-code {
   font-size: 1.2rem;
   font-weight: 500;
 }
+
 .rate-arrow {
   font-size: 1.5rem;
   color: #ccc;
   margin: 5px 0;
 }
+
 .rate-value {
   font-size: 2.5rem;
   font-weight: bold;
   color: #1abc9c;
   margin: 10px 0;
 }
+
 .rate-time {
   font-size: 0.8rem;
   color: #999;
 }
+
 .error-message {
   text-align: center;
   color: #dc3545;
 }
+
 .error-message p {
   margin: 5px 0;
 }
@@ -217,19 +240,139 @@ onMounted(() => {
   font-size: 0.9rem;
   cursor: pointer;
   transition: background-color 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 auto;
 }
+
 .refresh-btn:hover {
   background: #16a085;
 }
+
 .refresh-btn:disabled {
   background: #95a5a6;
   cursor: not-allowed;
 }
+
 .fa-spin {
   animation: fa-spin 2s infinite linear;
 }
+
 @keyframes fa-spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .currency-converter {
+    bottom: 90px;
+    right: 20px;
+  }
+  
+  .converter-toggle {
+    width: 50px;
+    height: 50px;
+    font-size: 20px;
+  }
+  
+  .converter-panel {
+    bottom: 60px;
+    right: -10px;
+    width: 280px;
+  }
+  
+  .panel-header {
+    padding: 8px 12px;
+  }
+  
+  .panel-header h4 {
+    font-size: 0.9rem;
+  }
+  
+  .panel-body {
+    padding: 15px;
+  }
+  
+  .currency-flag {
+    font-size: 1.5rem;
+  }
+  
+  .currency-code {
+    font-size: 1rem;
+  }
+  
+  .rate-value {
+    font-size: 2rem;
+  }
+  
+  .refresh-btn {
+    padding: 6px 12px;
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .currency-converter {
+    bottom: 80px;
+    right: 15px;
+  }
+  
+  .converter-toggle {
+    width: 45px;
+    height: 45px;
+    font-size: 18px;
+  }
+  
+  .converter-panel {
+    bottom: 55px;
+    right: -15px;
+    width: 260px;
+  }
+  
+  .panel-header {
+    padding: 6px 10px;
+  }
+  
+  .panel-header h4 {
+    font-size: 0.85rem;
+  }
+  
+  .panel-body {
+    padding: 12px;
+  }
+  
+  .currency-flag {
+    font-size: 1.3rem;
+  }
+  
+  .currency-code {
+    font-size: 0.9rem;
+  }
+  
+  .rate-value {
+    font-size: 1.8rem;
+  }
+  
+  .rate-time {
+    font-size: 0.75rem;
+  }
+  
+  .refresh-btn {
+    padding: 5px 10px;
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .converter-panel {
+    width: 240px;
+    right: -20px;
+  }
+  
+  .rate-value {
+    font-size: 1.6rem;
+  }
 }
 </style> 

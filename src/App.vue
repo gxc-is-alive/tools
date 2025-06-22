@@ -3,12 +3,14 @@
     <router-view />
     <SiteStatusChecker />
     <CurrencyConverter />
+    <ZenTimer />
   </div>
 </template>
 
 <script setup>
 import SiteStatusChecker from './components/SiteStatusChecker.vue';
 import CurrencyConverter from './components/CurrencyConverter.vue';
+import ZenTimer from './components/ZenTimer.vue';
 // 根组件逻辑
 </script>
 
@@ -19,15 +21,22 @@ import CurrencyConverter from './components/CurrencyConverter.vue';
   box-sizing: border-box;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background-color: #f4f7f9;
   color: #333;
   line-height: 1.6;
+  overflow-x: hidden;
 }
 
 #app {
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
 .container {
@@ -92,5 +101,52 @@ body {
 .form-group textarea {
   resize: vertical;
   min-height: 100px;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .container {
+    padding: 15px;
+  }
+  
+  .btn {
+    padding: 8px 16px;
+    font-size: 0.9rem;
+  }
+  
+  .card {
+    padding: 15px;
+    margin-bottom: 15px;
+  }
+  
+  .form-group input,
+  .form-group textarea,
+  .form-group select {
+    padding: 8px;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 10px;
+  }
+  
+  .btn {
+    padding: 6px 12px;
+    font-size: 0.85rem;
+  }
+  
+  .card {
+    padding: 12px;
+    margin-bottom: 12px;
+  }
+  
+  .form-group input,
+  .form-group textarea,
+  .form-group select {
+    padding: 6px;
+    font-size: 0.85rem;
+  }
 }
 </style> 

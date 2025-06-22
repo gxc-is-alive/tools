@@ -178,4 +178,8 @@ jspm_packages/
 # Project specific
 uploads/
 output/
-*.webp 
+*.webp
+
+# Docker image archives
+*.tar
+*.tar.gz 

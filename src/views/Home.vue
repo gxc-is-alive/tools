@@ -64,6 +64,8 @@
         </div>
       </main>
 
+      <SiteStatusChecker />
+
       <footer class="footer-section">
         <div class="footer-content">
           <p>© 2024 在线工具箱 - 让工作更简单</p>
@@ -79,11 +81,13 @@
 </template>
 
 <script setup>
-import { useRouter } from 'vue-router'
+import { computed } from 'vue';
+import { useRouter } from 'vue-router';
+import SiteStatusChecker from '../components/SiteStatusChecker.vue';
 
-const router = useRouter()
+const router = useRouter();
 
-const tools = [
+const tools = computed(() => [
   {
     id: 1,
     name: 'WebP 转换器',
@@ -119,11 +123,11 @@ const tools = [
     icon: 'fas fa-paper-plane',
     path: '/api-tester'
   }
-]
+]);
 
 const navigateTo = (path) => {
-  router.push(path)
-}
+  router.push(path);
+};
 </script>
 
 <style scoped>
@@ -208,6 +212,7 @@ const navigateTo = (path) => {
   align-items: center;
   justify-content: center;
   gap: 15px;
+  flex-wrap: wrap;
 }
 
 .title-icon {
@@ -233,10 +238,12 @@ const navigateTo = (path) => {
   justify-content: center;
   gap: 60px;
   margin-top: 40px;
+  flex-wrap: wrap;
 }
 
 .stat-item {
   text-align: center;
+  min-width: 120px;
 }
 
 .stat-number {
@@ -252,17 +259,14 @@ const navigateTo = (path) => {
 }
 
 .tools-section {
+  padding: 2rem 1rem;
   flex: 1;
-  padding: 60px 20px;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  border-radius: 30px 30px 0 0;
-  margin-top: 40px;
 }
 
 .section-header {
   text-align: center;
-  margin-bottom: 50px;
+  margin-bottom: 2rem;
+  padding: 0 1rem;
 }
 
 .section-header h2 {
@@ -279,10 +283,11 @@ const navigateTo = (path) => {
 
 .tools-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
-  gap: 30px;
-  max-width: 1200px;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 2rem;
+  max-width: 1400px;
   margin: 0 auto;
+  padding: 0 1rem;
 }
 
 .tool-card {
@@ -295,6 +300,7 @@ const navigateTo = (path) => {
   box-shadow: 0 10px 30px rgba(0,0,0,0.1);
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   height: 260px;
+  min-height: 200px;
 }
 
 .tool-card:hover {
@@ -419,6 +425,7 @@ const navigateTo = (path) => {
   padding: 30px 20px;
   text-align: center;
   color: white;
+  margin-top: auto;
 }
 
 .footer-content {
@@ -434,6 +441,7 @@ const navigateTo = (path) => {
 .footer-links {
   display: flex;
   gap: 30px;
+  flex-wrap: wrap;
 }
 
 .footer-link {
@@ -447,7 +455,27 @@ const navigateTo = (path) => {
   opacity: 1;
 }
 
+/* 响应式设计 */
+@media (max-width: 1024px) {
+  .tools-grid {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+  }
+  
+  .hero-title {
+    font-size: 3rem;
+  }
+  
+  .title-icon {
+    font-size: 2.5rem;
+  }
+}
+
 @media (max-width: 768px) {
+  .hero-section {
+    padding: 60px 15px 40px;
+  }
+  
   .hero-title {
     font-size: 2.5rem;
     flex-direction: column;
@@ -458,6 +486,10 @@ const navigateTo = (path) => {
     font-size: 2.5rem;
   }
   
+  .hero-subtitle {
+    font-size: 1.1rem;
+  }
+  
   .hero-stats {
     gap: 30px;
   }
@@ -466,9 +498,30 @@ const navigateTo = (path) => {
     font-size: 2rem;
   }
   
+  .stat-item {
+    min-width: 100px;
+  }
+  
+  .tools-section {
+    padding: 1.5rem 0.5rem;
+  }
+  
+  .section-header {
+    padding: 0 0.5rem;
+  }
+  
+  .section-header h2 {
+    font-size: 2rem;
+  }
+  
+  .section-header p {
+    font-size: 1rem;
+  }
+  
   .tools-grid {
     grid-template-columns: 1fr;
-    gap: 20px;
+    gap: 1rem;
+    padding: 0 0.5rem;
   }
   
   .tool-card {
@@ -477,7 +530,20 @@ const navigateTo = (path) => {
   }
   
   .card-content {
-    padding: 25px;
+    padding: 25px 20px;
+  }
+  
+  .tool-icon {
+    width: 60px;
+    height: 60px;
+  }
+  
+  .tool-icon i {
+    font-size: 40px;
+  }
+  
+  .tool-name {
+    font-size: 1.3rem;
   }
   
   .footer-content {
@@ -487,16 +553,26 @@ const navigateTo = (path) => {
   
   .footer-links {
     justify-content: center;
+    gap: 20px;
   }
 }
 
 @media (max-width: 480px) {
   .hero-section {
-    padding: 60px 15px 40px;
+    padding: 50px 10px 30px;
   }
   
-  .tools-section {
-    padding: 40px 15px;
+  .hero-title {
+    font-size: 2rem;
+  }
+  
+  .title-icon {
+    font-size: 2rem;
+  }
+  
+  .hero-subtitle {
+    font-size: 1rem;
+    margin-bottom: 30px;
   }
   
   .hero-stats {
@@ -504,8 +580,65 @@ const navigateTo = (path) => {
     gap: 20px;
   }
   
+  .stat-item {
+    min-width: auto;
+  }
+  
+  .tools-section {
+    padding: 1rem 0;
+  }
+  
+  .section-header {
+    padding: 0 10px;
+  }
+  
+  .section-header h2 {
+    font-size: 1.8rem;
+  }
+  
+  .tools-grid {
+    padding: 0 10px;
+  }
+  
   .tool-card {
-    margin: 0 10px;
+    margin: 0;
+  }
+  
+  .card-content {
+    padding: 20px 15px;
+  }
+  
+  .tool-icon {
+    width: 50px;
+    height: 50px;
+    margin-bottom: 15px;
+  }
+  
+  .tool-icon i {
+    font-size: 35px;
+  }
+  
+  .tool-name {
+    font-size: 1.2rem;
+  }
+  
+  .tool-description {
+    font-size: 0.9rem;
+  }
+  
+  .footer-section {
+    padding: 20px 10px;
+  }
+  
+  .footer-links {
+    gap: 15px;
+  }
+}
+
+/* 确保SiteStatusChecker不会遮挡内容 */
+@media (max-width: 768px) {
+  .footer-section {
+    margin-bottom: 80px; /* 为固定定位的SiteStatusChecker留出空间 */
   }
 }
 </style> 
