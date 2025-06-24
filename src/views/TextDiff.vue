@@ -13,35 +13,39 @@
         <div class="text-inputs">
           <div class="input-group">
             <label for="text1">原始文本</label>
-            <textarea 
+            <textarea
               id="text1"
-              v-model="text1" 
+              v-model="text1"
               placeholder="请输入原始文本..."
               @input="compareTexts"
             ></textarea>
           </div>
-          
+
           <div class="input-group">
             <label for="text2">对比文本</label>
-            <textarea 
+            <textarea
               id="text2"
-              v-model="text2" 
+              v-model="text2"
               placeholder="请输入对比文本..."
               @input="compareTexts"
             ></textarea>
           </div>
         </div>
-        
+
         <div class="controls">
           <div class="algorithm-selector">
             <label for="algorithm">比对算法:</label>
-            <select id="algorithm" v-model="selectedAlgorithm" @change="compareTexts">
+            <select
+              id="algorithm"
+              v-model="selectedAlgorithm"
+              @change="compareTexts"
+            >
               <option value="diff">diff库 (推荐)</option>
               <option value="optimized">优化算法</option>
               <option value="simple">简单算法</option>
             </select>
           </div>
-          
+
           <div class="action-buttons">
             <button @click="clearTexts" class="btn btn-secondary">
               <i class="fas fa-trash"></i> 清空
@@ -64,11 +68,12 @@
               <i class="fas fa-minus text-danger"></i> 删除: {{ stats.removed }}
             </span>
             <span class="stat-item">
-              <i class="fas fa-equals text-info"></i> 相同: {{ stats.unchanged }}
+              <i class="fas fa-equals text-info"></i> 相同:
+              {{ stats.unchanged }}
             </span>
           </div>
         </div>
-        
+
         <div class="diff-content" v-html="diffResult"></div>
       </div>
 
@@ -88,119 +93,136 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { simpleCharDiffV2, optimizedCharDiff } from '../utils/diff.js'
+import { ref, onMounted } from "vue";
+import { simpleCharDiffV2, optimizedCharDiff } from "../utils/diff.js";
 
-const text1 = ref('')
-const text2 = ref('')
-const diffResult = ref('')
-const stats = ref({ added: 0, removed: 0, unchanged: 0 })
-const error = ref('')
-const usingFallback = ref(false)
-const selectedAlgorithm = ref('diff')
-let Diff = null
+const text1 = ref("");
+const text2 = ref("");
+const diffResult = ref("");
+const stats = ref({ added: 0, removed: 0, unchanged: 0 });
+const error = ref("");
+const usingFallback = ref(false);
+const selectedAlgorithm = ref("diff");
+let Diff = null;
 
 // 尝试加载diff库
 onMounted(async () => {
   try {
-    const diffModule = await import('diff')
-    Diff = diffModule.default || diffModule
-    console.log('diff库加载成功')
+    const diffModule = await import("diff");
+    Diff = diffModule.default || diffModule;
+    console.log("diff库加载成功");
   } catch (err) {
-    console.warn('diff库加载失败，使用备用方案:', err)
-    usingFallback.value = true
-    selectedAlgorithm.value = 'optimized'
+    console.warn("diff库加载失败，使用备用方案:", err);
+    usingFallback.value = true;
+    selectedAlgorithm.value = "optimized";
   }
-})
+});
 
 const compareTexts = () => {
   if (!text1.value && !text2.value) {
-    diffResult.value = ''
-    error.value = ''
-    return
+    diffResult.value = "";
+    error.value = "";
+    return;
   }
 
   try {
-    let diff
-    
-    if (selectedAlgorithm.value === 'diff' && Diff && typeof Diff.diffLines === 'function') {
+    let diff;
+
+    if (
+      selectedAlgorithm.value === "diff" &&
+      Diff &&
+      typeof Diff.diffLines === "function"
+    ) {
       // 使用diff库 - 行级比对
-      diff = Diff.diffLines(text1.value, text2.value, { newlineIsToken: true })
-    } else if (selectedAlgorithm.value === 'optimized') {
+      diff = Diff.diffLines(text1.value, text2.value, { newlineIsToken: true });
+    } else if (selectedAlgorithm.value === "optimized") {
       // 使用优化算法
-      diff = optimizedCharDiff(text1.value, text2.value)
+      diff = optimizedCharDiff(text1.value, text2.value);
     } else {
       // 使用简单算法
-      diff = simpleCharDiffV2(text1.value, text2.value)
+      diff = simpleCharDiffV2(text1.value, text2.value);
     }
-    
-    let result = ''
-    let addedCount = 0
-    let removedCount = 0
-    let unchangedCount = 0
+
+    let result = "";
+    let addedCount = 0;
+    let removedCount = 0;
+    let unchangedCount = 0;
 
     // 检查是否完全相同
     if (diff.length === 1 && !diff[0].added && !diff[0].removed) {
-      result = '<div style="color: #27ae60; font-weight: bold;">两段文本完全相同。</div>'
+      result =
+        '<div style="color: #27ae60; font-weight: bold;">两段文本完全相同。</div>';
       stats.value = {
         added: 0,
         removed: 0,
-        unchanged: text1.value.length
-      }
+        unchanged: text1.value.length,
+      };
     } else {
-      diff.forEach(part => {
+      diff.forEach((part) => {
         if (part.added) {
-          result += `<ins style="background-color: #d4edda; color: #155724; text-decoration: none; padding: 2px 4px; border-radius: 3px;">${escapeHtml(part.value)}</ins>`
-          addedCount += part.value.length
+          result += `<ins style="background-color: #d4edda; color: #155724; text-decoration: none; padding: 2px 4px; border-radius: 3px;">${escapeHtml(
+            part.value
+          )}</ins>`;
+          addedCount += part.value.length;
         } else if (part.removed) {
-          result += `<del style="background-color: #f8d7da; color: #721c24; padding: 2px 4px; border-radius: 3px;">${escapeHtml(part.value)}</del>`
-          removedCount += part.value.length
+          result += `<del style="background-color: #f8d7da; color: #721c24; padding: 2px 4px; border-radius: 3px;">${escapeHtml(
+            part.value
+          )}</del>`;
+          removedCount += part.value.length;
         } else {
-          result += `<span style="color: #333;">${escapeHtml(part.value)}</span>`
-          unchangedCount += part.value.length
+          result += `<span style="color: #333;">${escapeHtml(
+            part.value
+          )}</span>`;
+          unchangedCount += part.value.length;
         }
-      })
+      });
 
       stats.value = {
         added: addedCount,
         removed: removedCount,
-        unchanged: unchangedCount
-      }
+        unchanged: unchangedCount,
+      };
     }
 
-    diffResult.value = result
-    error.value = ''
+    diffResult.value = result;
+    error.value = "";
   } catch (err) {
-    console.error('文本比对失败:', err)
-    error.value = '比对过程中出现错误，请检查输入内容'
-    diffResult.value = ''
+    console.error("文本比对失败:", err);
+    error.value = "比对过程中出现错误，请检查输入内容";
+    diffResult.value = "";
   }
-}
+};
 
 // HTML转义函数
 const escapeHtml = (text) => {
-  const div = document.createElement('div')
-  div.textContent = text
-  return div.innerHTML
-}
+  const div = document.createElement("div");
+  div.textContent = text;
+  return div.innerHTML;
+};
 
 const clearTexts = () => {
-  text1.value = ''
-  text2.value = ''
-  diffResult.value = ''
-  stats.value = { added: 0, removed: 0, unchanged: 0 }
-  error.value = ''
-}
+  text1.value = "";
+  text2.value = "";
+  diffResult.value = "";
+  stats.value = { added: 0, removed: 0, unchanged: 0 };
+  error.value = "";
+};
 
 const swapTexts = () => {
-  const temp = text1.value
-  text1.value = text2.value
-  text2.value = temp
-  compareTexts()
-}
+  const temp = text1.value;
+  text1.value = text2.value;
+  text2.value = temp;
+  compareTexts();
+};
 </script>
 
 <style scoped>
+.container {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
 header {
   text-align: center;
   margin-bottom: 30px;
@@ -233,22 +255,23 @@ header p {
 }
 
 .diff-container {
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
 }
 
 .input-section {
   background: white;
-  padding: 20px;
+  padding: 25px 35px;
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   margin-bottom: 20px;
+  min-width: 1000px;
 }
 
 .text-inputs {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 20px;
+  gap: 25px;
   margin-bottom: 20px;
 }
 
@@ -264,14 +287,16 @@ header p {
 }
 
 .input-group textarea {
-  min-height: 200px;
+  width: 100%;
+  min-height: 300px;
   resize: vertical;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
   font-size: 14px;
   line-height: 1.5;
-  padding: 12px;
+  padding: 15px;
   border: 1px solid #ddd;
   border-radius: 6px;
+  box-sizing: border-box;
 }
 
 .controls {
@@ -328,7 +353,7 @@ header p {
   background: white;
   padding: 20px;
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .result-header {
@@ -373,7 +398,7 @@ header p {
   background: #f8f9fa;
   padding: 15px;
   border-radius: 6px;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
   font-size: 14px;
   line-height: 1.6;
   white-space: pre-wrap;
@@ -388,24 +413,27 @@ header p {
   background-color: #d4edda;
   color: #155724;
   text-decoration: none;
-  padding: 2px 4px;
-  border-radius: 3px;
-  display: inline-block;
-  margin: 1px 0;
+  padding: 4px 8px;
+  border-radius: 4px;
+  display: block;
+  margin: 2px 0;
+  border-left: 4px solid #28a745;
 }
 
 .diff-content :deep(del) {
   background-color: #f8d7da;
   color: #721c24;
-  padding: 2px 4px;
-  border-radius: 3px;
-  display: inline-block;
-  margin: 1px 0;
+  padding: 4px 8px;
+  border-radius: 4px;
+  display: block;
+  margin: 2px 0;
+  border-left: 4px solid #dc3545;
 }
 
 .diff-content :deep(span) {
   color: #333;
-  display: inline-block;
+  display: block;
+  padding: 2px 8px;
   margin: 1px 0;
 }
 
@@ -447,25 +475,25 @@ header p {
   .text-inputs {
     grid-template-columns: 1fr;
   }
-  
+
   .controls {
     flex-direction: column;
     align-items: stretch;
   }
-  
+
   .algorithm-selector {
     justify-content: center;
   }
-  
+
   .result-header {
     flex-direction: column;
     gap: 10px;
     align-items: flex-start;
   }
-  
+
   .stats {
     flex-wrap: wrap;
     gap: 10px;
   }
 }
-</style> 
+</style>
