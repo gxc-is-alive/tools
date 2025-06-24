@@ -108,6 +108,13 @@ const tools = computed(() => [
     icon: "fas fa-paper-plane",
     path: "/api-tester",
   },
+  {
+    id: 8,
+    name: "暂存室",
+    description: "安全暂存文本和文件，支持多端同步和数据导出",
+    icon: "fas fa-archive",
+    path: "/storage",
+  },
 ]);
 
 const navigateTo = (path) => {

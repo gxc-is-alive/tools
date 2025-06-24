@@ -1,0 +1,35 @@
+{
+    "name": "暂存室预览测试",
+    "version": "1.0.0",
+    "description": "测试文件预览功能",
+    "features": [
+        "文本预览",
+        "图片预览",
+        "PDF预览",
+        "音频预览",
+        "视频预览"
+    ],
+    "settings": {
+        "theme": "light",
+        "language": "zh-CN",
+        "autoPreview": true
+    },
+    "testData": {
+        "numbers": [
+            1,
+            2,
+            3,
+            4,
+            5
+        ],
+        "boolean": true,
+        "null": null,
+        "nested": {
+            "level1": {
+                "level2": {
+                    "message": "深层嵌套测试"
+                }
+            }
+        }
+    }
+}

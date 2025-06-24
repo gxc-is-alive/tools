@@ -26,7 +26,7 @@
             placeholder="搜索内容或输入网址..."
             class="search-input"
             @input="onInputChange"
-            @focus="showSuggestions = true"
+            @focus="handleFocus"
             @blur="handleBlur"
             @keydown="handleKeydown"
             autocomplete="off"
@@ -35,7 +35,9 @@
           <!-- 建议下拉框 -->
           <div
             v-if="
-              showSuggestions && (filteredSuggestions.length || query.trim())
+              showSuggestions &&
+              query.trim() &&
+              (filteredSuggestions.length || query.trim())
             "
             class="suggestions-dropdown"
           >
@@ -93,7 +95,11 @@
             </div>
           </div>
         </div>
-        <button type="submit" class="search-button" title="搜索">
+        <button
+          type="submit"
+          :class="['search-button', { focused: isSearchFocused }]"
+          title="搜索"
+        >
           <i class="fas fa-search"></i>
         </button>
       </form>
@@ -249,7 +255,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted, nextTick } from "vue";
+import { ref, reactive, computed, onMounted, onUnmounted, nextTick } from "vue";
 
 const query = ref("");
 const searchEngine = ref("google");
@@ -257,6 +263,7 @@ const showSuggestions = ref(false);
 const selectedSuggestionIndex = ref(-1);
 const showBookmarkModal = ref(false);
 const searchInput = ref(null);
+const isSearchFocused = ref(false);
 
 // 数据存储
 const searchHistory = ref([]);
@@ -271,9 +278,15 @@ const bookmarkSuggestions = ref([]);
 const folderExpanded = ref({});
 
 // 初始化
-onMounted(() => {
+onMounted(async () => {
   loadSearchHistory();
   loadBookmarks();
+
+  // 自动聚焦搜索框
+  await nextTick();
+  if (searchInput.value) {
+    searchInput.value.focus();
+  }
 
   // 如果没有历史记录，添加一些示例数据
   if (searchHistory.value.length === 0) {
@@ -340,6 +353,14 @@ onMounted(() => {
 
   // 初始化建议
   updateSuggestions();
+
+  // 添加全局键盘快捷键监听
+  document.addEventListener("keydown", handleGlobalKeydown);
+});
+
+onUnmounted(() => {
+  // 移除全局键盘事件监听器
+  document.removeEventListener("keydown", handleGlobalKeydown);
 });
 
 // 计算属性
@@ -425,6 +446,12 @@ const isValidUrl = (string) => {
 // 输入变化处理
 const onInputChange = () => {
   updateSuggestions();
+  // 根据输入内容控制建议显示
+  if (query.value.trim()) {
+    showSuggestions.value = true;
+  } else {
+    showSuggestions.value = false;
+  }
 };
 
 // 更新建议
@@ -432,21 +459,9 @@ const updateSuggestions = () => {
   const searchTerm = query.value.toLowerCase().trim();
 
   if (!searchTerm) {
-    // 没有输入时显示最近的历史记录和书签
-    historySuggestions.value = searchHistory.value.slice(0, 3).map((item) => ({
-      type: "history",
-      title: item.query,
-      url: item.url,
-      data: item,
-    }));
-
-    bookmarkSuggestions.value = bookmarks.value.slice(0, 3).map((bookmark) => ({
-      type: "bookmark",
-      title: bookmark.title,
-      url: bookmark.url,
-      data: bookmark,
-    }));
-
+    // 没有输入时清空所有建议
+    historySuggestions.value = [];
+    bookmarkSuggestions.value = [];
     searchSuggestions.value = [];
     return;
   }
@@ -508,6 +523,27 @@ const getSuggestionIcon = (type) => {
       return "fas fa-search";
     default:
       return "fas fa-globe";
+  }
+};
+
+// 全局键盘快捷键处理
+const handleGlobalKeydown = (e) => {
+  // Ctrl+F 或 Cmd+F 聚焦搜索框
+  if ((e.ctrlKey || e.metaKey) && e.key === "f") {
+    e.preventDefault();
+    if (searchInput.value) {
+      searchInput.value.focus();
+      searchInput.value.select(); // 选中所有文本
+    }
+    return;
+  }
+
+  // ESC 清空搜索并失去焦点
+  if (e.key === "Escape" && document.activeElement === searchInput.value) {
+    query.value = "";
+    showSuggestions.value = false;
+    searchInput.value.blur();
+    return;
   }
 };
 
@@ -604,8 +640,18 @@ const selectSuggestion = (suggestion) => {
   closeSuggestions();
 };
 
+// 获得焦点处理
+const handleFocus = () => {
+  isSearchFocused.value = true;
+  // 只有在有内容时才显示建议
+  if (query.value.trim()) {
+    showSuggestions.value = true;
+  }
+};
+
 // 失去焦点处理
 const handleBlur = () => {
+  isSearchFocused.value = false;
   setTimeout(() => {
     showSuggestions.value = false;
     selectedSuggestionIndex.value = -1;
@@ -1108,6 +1154,11 @@ const collapseAllFolders = () => {
   font-size: 16px;
   background-color: transparent;
   color: #333;
+  transition: all 0.2s ease;
+}
+
+.search-input:focus {
+  background-color: rgba(102, 126, 234, 0.05);
 }
 
 .search-input::placeholder {
@@ -1133,24 +1184,36 @@ const collapseAllFolders = () => {
   background: #5a67d8;
 }
 
+.search-button.focused {
+  background: #5a67d8;
+  transform: scale(1.05);
+}
+
 .bookmark-controls {
   padding-left: 12px;
-  border-left: 1px solid #e2e8f0;
 }
 
 .bookmark-btn {
-  background: none;
+  background: #f09317;
   border: none;
   cursor: pointer;
-  padding: 10px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
-  color: #667eea;
-  transition: all 0.2s ease;
+  color: white;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 15px rgba(240, 147, 23, 0.3);
+  transition: all 0.3s ease;
 }
 
 .bookmark-btn:hover {
-  background-color: #f0f4ff;
-  color: #5a67d8;
+  background: #e6840f;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(240, 147, 23, 0.4);
 }
 
 /* 建议下拉框 */

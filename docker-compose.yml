@@ -1,0 +1,36 @@
+version: "3.8"
+
+services:
+  tools-app:
+    build: .
+    container_name: tools-app
+    ports:
+      - "3001:3001"
+    volumes:
+      # 数据库持久化存储
+      - ./docker-data/database:/app/data
+      # 上传文件持久化存储
+      - ./docker-data/uploads:/app/uploads
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://localhost:3001",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  database:
+    driver: local
+  uploads:
+    driver: local
