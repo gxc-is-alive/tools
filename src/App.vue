@@ -6,7 +6,13 @@
       </button>
       <div v-if="showThemePanel" class="theme-panel">
         <div v-for="theme in themes" :key="theme.value" class="theme-option">
-          <button :class="['theme-select-btn', {active: currentTheme === theme.value}]" @click="switchTheme(theme.value)">
+          <button
+            :class="[
+              'theme-select-btn',
+              { active: currentTheme === theme.value },
+            ]"
+            @click="switchTheme(theme.value)"
+          >
             {{ theme.label }}
           </button>
         </div>
@@ -23,47 +29,47 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue';
-import SiteStatusChecker from './components/SiteStatusChecker.vue';
-import CurrencyConverter from './components/CurrencyConverter.vue';
-import ZenTimer from './components/ZenTimer.vue';
-import VisitStats from './components/VisitStats.vue';
+import { ref, onMounted, watch } from "vue";
+import SiteStatusChecker from "./components/SiteStatusChecker.vue";
+import CurrencyConverter from "./components/CurrencyConverter.vue";
+import ZenTimer from "./components/ZenTimer.vue";
+import VisitStats from "./components/VisitStats.vue";
 
 const themes = [
-  { label: '默认', value: 'default-theme' },
-  { label: '科技风', value: 'tech-theme' }
+  { label: "默认", value: "default-theme" },
+  { label: "科技风", value: "tech-theme" },
 ];
-const currentTheme = ref('default-theme');
+const currentTheme = ref("default-theme");
 const showThemePanel = ref(false);
 
 function switchTheme(theme) {
   currentTheme.value = theme;
-  localStorage.setItem('theme', theme);
+  localStorage.setItem("theme", theme);
   showThemePanel.value = false;
-  
+
   // 更新 body 和 app 元素的 class
   updateThemeClasses(theme);
-  
+
   // 触发自定义事件，通知其他组件主题已变化
-  window.dispatchEvent(new CustomEvent('themeChanged'));
+  window.dispatchEvent(new CustomEvent("themeChanged"));
 }
 
 function updateThemeClasses(theme) {
-  const app = document.getElementById('app');
+  const app = document.getElementById("app");
   const body = document.body;
-  
+
   // 移除所有主题 class
-  app?.classList.remove('default-theme', 'tech-theme');
-  body.classList.remove('default-theme', 'tech-theme');
-  
+  app?.classList.remove("default-theme", "tech-theme");
+  body.classList.remove("default-theme", "tech-theme");
+
   // 添加当前主题 class（包括默认主题）
   app?.classList.add(theme);
   body.classList.add(theme);
 }
 
 onMounted(() => {
-  const saved = localStorage.getItem('theme');
-  if (saved && themes.some(t => t.value === saved)) {
+  const saved = localStorage.getItem("theme");
+  if (saved && themes.some((t) => t.value === saved)) {
     currentTheme.value = saved;
     updateThemeClasses(saved);
   }
@@ -87,7 +93,7 @@ html {
 }
 
 body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   background-color: #f4f7f9;
   color: #333;
   line-height: 1.6;
@@ -134,7 +140,7 @@ body {
 .card {
   background-color: white;
   border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   padding: 20px;
   margin-bottom: 20px;
 }
@@ -169,17 +175,17 @@ body {
   .container {
     padding: 15px;
   }
-  
+
   .btn {
     padding: 8px 16px;
     font-size: 0.9rem;
   }
-  
+
   .card {
     padding: 15px;
     margin-bottom: 15px;
   }
-  
+
   .form-group input,
   .form-group textarea,
   .form-group select {
@@ -192,17 +198,17 @@ body {
   .container {
     padding: 10px;
   }
-  
+
   .btn {
     padding: 6px 12px;
     font-size: 0.85rem;
   }
-  
+
   .card {
     padding: 12px;
     margin-bottom: 12px;
   }
-  
+
   .form-group input,
   .form-group textarea,
   .form-group select {
@@ -273,7 +279,12 @@ body {
   --tech-text-secondary: #4a5568;
   --tech-border-glow: #667eea;
   --tech-shadow-glow: 0 4px 20px rgba(102, 126, 234, 0.15);
-  --tech-gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+  --tech-gradient-primary: linear-gradient(
+    135deg,
+    #667eea 0%,
+    #764ba2 50%,
+    #f093fb 100%
+  );
   --tech-gradient-secondary: linear-gradient(45deg, #667eea, #764ba2);
   --tech-gradient-tertiary: linear-gradient(135deg, #f093fb, #f5576c);
 }
@@ -281,7 +292,7 @@ body {
 .tech-theme body {
   background: var(--tech-bg-primary);
   color: var(--tech-text-primary);
-  font-family: 'Orbitron', 'Segoe UI', monospace;
+  font-family: "Orbitron", "Segoe UI", monospace;
 }
 
 .tech-theme .container {
@@ -306,13 +317,18 @@ body {
 }
 
 .tech-theme .btn::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
   transition: left 0.5s ease;
 }
 
@@ -408,7 +424,8 @@ body {
 }
 
 @keyframes techFloat {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0) rotate(0deg);
     opacity: 0.1;
   }
@@ -423,29 +440,29 @@ body {
   .container {
     padding: 15px;
   }
-  
+
   .btn {
     padding: 8px 16px;
     font-size: 0.9rem;
   }
-  
+
   .card {
     padding: 15px;
     margin-bottom: 15px;
   }
-  
+
   .form-group input,
   .form-group textarea,
   .form-group select {
     padding: 8px;
     font-size: 0.9rem;
   }
-  
+
   .theme-switcher {
     top: 16px;
     right: 16px;
   }
-  
+
   .theme-btn {
     padding: 6px 12px;
     font-size: 0.9rem;
@@ -456,17 +473,17 @@ body {
   .container {
     padding: 10px;
   }
-  
+
   .btn {
     padding: 6px 12px;
     font-size: 0.85rem;
   }
-  
+
   .card {
     padding: 12px;
     margin-bottom: 12px;
   }
-  
+
   .form-group input,
   .form-group textarea,
   .form-group select {
@@ -486,4 +503,21 @@ body {
   gap: 15px;
   z-index: 1000;
 }
-</style> 
+
+/* 移动端响应式设计 - 悬浮按钮 */
+@media (max-width: 768px) {
+  .fab-container {
+    bottom: 80px;
+    right: 20px;
+    gap: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .fab-container {
+    bottom: 20px;
+    right: 15px;
+    gap: 20px;
+  }
+}
+</style>

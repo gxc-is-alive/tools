@@ -3,7 +3,10 @@
     <div class="checker-toggle" @click="togglePanel" :title="toggleTooltipText">
       <i class="fas fa-network-wired"></i>
       <span v-if="overallStatus === 'ok'" class="status-badge ok"></span>
-      <span v-else-if="overallStatus === 'error'" class="status-badge error"></span>
+      <span
+        v-else-if="overallStatus === 'error'"
+        class="status-badge error"
+      ></span>
       <span v-else class="status-badge checking"></span>
     </div>
 
@@ -34,23 +37,42 @@
 
       <div class="panel-body">
         <ul class="site-list">
-          <li v-for="(site, index) in sites" :key="index" class="site-item" :class="{ 'has-error': site.status === 'error' }">
+          <li
+            v-for="(site, index) in sites"
+            :key="index"
+            class="site-item"
+            :class="{ 'has-error': site.status === 'error' }"
+          >
             <span class="site-status">
-              <span v-if="site.status === 'ok'" class="status-indicator ok" title="访问正常"></span>
-              <span v-else-if="site.status === 'error'" class="status-indicator error" :title="`访问异常: ${site.message}`"></span>
-              <span v-else class="status-indicator checking" title="检查中..."></span>
+              <span
+                v-if="site.status === 'ok'"
+                class="status-indicator ok"
+                title="访问正常"
+              ></span>
+              <span
+                v-else-if="site.status === 'error'"
+                class="status-indicator error"
+                :title="`访问异常: ${site.message}`"
+              ></span>
+              <span
+                v-else
+                class="status-indicator checking"
+                title="检查中..."
+              ></span>
             </span>
-            <a :href="site.url" target="_blank" class="site-url">{{ site.url }}</a>
-            <button class="remove-btn" @click="removeSite(index)">&times;</button>
+            <a :href="site.url" target="_blank" class="site-url">{{
+              site.url
+            }}</a>
+            <button class="remove-btn" @click="removeSite(index)">
+              &times;
+            </button>
           </li>
-          <li v-if="sites.length === 0" class="no-sites">
-            暂无监控站点
-          </li>
+          <li v-if="sites.length === 0" class="no-sites">暂无监控站点</li>
         </ul>
         <div class="add-site-form">
-          <input 
-            type="text" 
-            v-model="newSiteUrl" 
+          <input
+            type="text"
+            v-model="newSiteUrl"
             placeholder="添加新网址, 如: https://example.com"
             @keyup.enter="addSite"
           />
@@ -59,9 +81,13 @@
       </div>
       <div class="panel-footer">
         <p>每 5 分钟自动刷新</p>
-        <button class="refresh-btn" @click="checkAllSites" :disabled="isChecking">
+        <button
+          class="refresh-btn"
+          @click="checkAllSites"
+          :disabled="isChecking"
+        >
           <i class="fas fa-sync-alt" :class="{ 'fa-spin': isChecking }"></i>
-          {{ isChecking ? '检查中...' : '立即刷新' }}
+          {{ isChecking ? "检查中..." : "立即刷新" }}
         </button>
       </div>
     </div>
@@ -69,71 +95,79 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, computed } from 'vue';
-import { commonApi } from '../services/api';
+import { ref, onMounted, onUnmounted, computed } from "vue";
+import { commonApi } from "../services/api";
 
 const sites = ref([]);
-const newSiteUrl = ref('');
+const newSiteUrl = ref("");
 const isOpen = ref(false);
 const isChecking = ref(false);
 let intervalId = null;
 
 const totalSites = computed(() => sites.value.length);
-const okSites = computed(() => sites.value.filter(s => s.status === 'ok').length);
-const errorSites = computed(() => sites.value.filter(s => s.status === 'error').length);
-const checkingSites = computed(() => sites.value.filter(s => s.status === 'checking').length);
-const errorSitesList = computed(() => sites.value.filter(s => s.status === 'error'));
+const okSites = computed(
+  () => sites.value.filter((s) => s.status === "ok").length
+);
+const errorSites = computed(
+  () => sites.value.filter((s) => s.status === "error").length
+);
+const checkingSites = computed(
+  () => sites.value.filter((s) => s.status === "checking").length
+);
+const errorSitesList = computed(() =>
+  sites.value.filter((s) => s.status === "error")
+);
 
 const toggleTooltipText = computed(() => {
   if (errorSitesList.value.length > 0) {
-    const failedUrls = errorSitesList.value.map(s => s.url).join(', ');
+    const failedUrls = errorSitesList.value.map((s) => s.url).join(", ");
     return `异常站点: ${failedUrls}`;
   }
   if (checkingSites.value > 0) {
-    return '正在检查站点状态...';
+    return "正在检查站点状态...";
   }
-  return '所有站点访问正常';
+  return "所有站点访问正常";
 });
 
 const overallStatus = computed(() => {
-  if (sites.value.length === 0) return 'ok';
-  if (errorSites.value > 0) return 'error';
-  if (checkingSites.value > 0) return 'checking';
-  return 'ok';
+  if (sites.value.length === 0) return "ok";
+  if (errorSites.value > 0) return "error";
+  if (checkingSites.value > 0) return "checking";
+  return "ok";
 });
 
 const loadSites = () => {
-  const savedSites = localStorage.getItem('monitoredSites');
+  const savedSites = localStorage.getItem("monitoredSites");
   if (savedSites) {
     sites.value = JSON.parse(savedSites);
   } else {
     // 首次加载时添加一个默认网址
-    sites.value = [{ url: 'https://a.gxc1994.top', status: 'checking' }];
+    sites.value = [{ url: "https://a.gxc1994.top", status: "checking" }];
     saveSites();
   }
 };
 
 const saveSites = () => {
-  localStorage.setItem('monitoredSites', JSON.stringify(sites.value));
+  localStorage.setItem("monitoredSites", JSON.stringify(sites.value));
 };
 
 const addSite = () => {
   let url = newSiteUrl.value.trim();
   if (!url) return;
-  
-  if (!url.startsWith('http://') && !url.startsWith('https://')) {
-    url = 'https://' + url;
+
+  if (!url.startsWith("http://") && !url.startsWith("https://")) {
+    url = "https://" + url;
   }
 
-  if (sites.value.some(site => site.url === url)) {
-    alert('该网址已在监控列表中');
+  if (sites.value.some((site) => site.url === url)) {
+    alert("该网址已在监控列表中");
     return;
   }
-  
-  const newSite = { url, status: 'checking' };
+
+  const newSite = { url, status: "checking" };
   sites.value.push(newSite);
   saveSites();
-  newSiteUrl.value = '';
+  newSiteUrl.value = "";
   checkSiteStatus(newSite);
 };
 
@@ -143,25 +177,25 @@ const removeSite = (index) => {
 };
 
 const checkSiteStatus = async (site) => {
-  site.status = 'checking';
+  site.status = "checking";
   try {
     const response = await commonApi.checkUrl(site.url);
     if (response.success) {
-      site.status = 'ok';
+      site.status = "ok";
     } else {
-      site.status = 'error';
-      site.message = response.message || '未知错误';
+      site.status = "error";
+      site.message = response.message || "未知错误";
     }
   } catch (error) {
-    site.status = 'error';
-    site.message = error.message || '请求失败';
+    site.status = "error";
+    site.message = error.message || "请求失败";
   }
 };
 
 const checkAllSites = async () => {
   if (isChecking.value) return;
   isChecking.value = true;
-  await Promise.all(sites.value.map(site => checkSiteStatus(site)));
+  await Promise.all(sites.value.map((site) => checkSiteStatus(site)));
   isChecking.value = false;
   saveSites();
 };
@@ -185,7 +219,7 @@ onUnmounted(() => {
 
 <style scoped>
 .site-status-checker {
-  position: relative;
+  /* position: relative; */
 }
 
 .checker-toggle {
@@ -198,14 +232,14 @@ onUnmounted(() => {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   transition: all 0.3s ease;
   position: relative;
 }
 
 .checker-toggle:hover {
   transform: scale(1.1);
-  box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
 }
 
 .checker-toggle i {
@@ -236,8 +270,13 @@ onUnmounted(() => {
 }
 
 @keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
 }
 
 .checker-panel {
@@ -247,7 +286,7 @@ onUnmounted(() => {
   width: 350px;
   background-color: white;
   border-radius: 15px;
-  box-shadow: 0 5px 25px rgba(0,0,0,0.2);
+  box-shadow: 0 5px 25px rgba(0, 0, 0, 0.2);
   transform: translateY(20px) scale(0.95);
   opacity: 0;
   visibility: hidden;
@@ -328,15 +367,18 @@ onUnmounted(() => {
   color: #333;
 }
 
-.summary-label.ok, .summary-value.ok {
+.summary-label.ok,
+.summary-value.ok {
   color: #28a745;
 }
 
-.summary-label.error, .summary-value.error {
+.summary-label.error,
+.summary-value.error {
   color: #dc3545;
 }
 
-.summary-label.checking, .summary-value.checking {
+.summary-label.checking,
+.summary-value.checking {
   color: #ffc107;
 }
 
@@ -534,70 +576,70 @@ onUnmounted(() => {
     bottom: 20px;
     right: 20px;
   }
-  
+
   .checker-toggle {
     width: 50px;
     height: 50px;
   }
-  
+
   .checker-toggle i {
     font-size: 18px;
   }
-  
+
   .status-badge {
     width: 18px;
     height: 18px;
   }
-  
+
   .checker-panel {
     bottom: 70px;
     right: -10px;
     width: 320px;
     max-height: 400px;
   }
-  
+
   .panel-header {
     padding: 15px;
   }
-  
+
   .panel-header h3 {
     font-size: 15px;
   }
-  
+
   .panel-summary {
     padding: 12px 15px;
     grid-template-columns: repeat(2, 1fr);
     gap: 8px;
   }
-  
+
   .summary-value {
     font-size: 16px;
   }
-  
+
   .panel-body {
     padding: 15px;
     max-height: 250px;
   }
-  
+
   .site-url {
     font-size: 12px;
   }
-  
+
   .add-site-form input {
     font-size: 12px;
     padding: 6px 10px;
   }
-  
+
   .add-site-form button {
     width: 28px;
     height: 28px;
     font-size: 14px;
   }
-  
+
   .panel-footer {
     padding: 12px 15px;
   }
-  
+
   .refresh-btn {
     padding: 5px 10px;
     font-size: 11px;
@@ -605,90 +647,85 @@ onUnmounted(() => {
 }
 
 @media (max-width: 480px) {
-  .site-status-checker {
-    bottom: 15px;
-    right: 15px;
-  }
-  
   .checker-toggle {
     width: 45px;
     height: 45px;
   }
-  
+
   .checker-toggle i {
     font-size: 16px;
   }
-  
+
   .status-badge {
     width: 16px;
     height: 16px;
   }
-  
+
   .checker-panel {
     bottom: 60px;
     right: -15px;
     width: 280px;
     max-height: 350px;
   }
-  
+
   .panel-header {
     padding: 12px;
   }
-  
+
   .panel-header h3 {
     font-size: 14px;
   }
-  
+
   .panel-summary {
     padding: 10px 12px;
     grid-template-columns: repeat(2, 1fr);
     gap: 6px;
   }
-  
+
   .summary-label {
     font-size: 10px;
   }
-  
+
   .summary-value {
     font-size: 14px;
   }
-  
+
   .panel-body {
     padding: 12px;
     max-height: 200px;
   }
-  
+
   .site-item {
     padding: 8px 0;
   }
-  
+
   .site-url {
     font-size: 11px;
   }
-  
+
   .add-site-form {
     gap: 6px;
   }
-  
+
   .add-site-form input {
     font-size: 11px;
     padding: 5px 8px;
   }
-  
+
   .add-site-form button {
     width: 26px;
     height: 26px;
     font-size: 12px;
   }
-  
+
   .panel-footer {
     padding: 10px 12px;
   }
-  
+
   .panel-footer p {
     font-size: 11px;
   }
-  
+
   .refresh-btn {
     padding: 4px 8px;
     font-size: 10px;
@@ -700,20 +737,20 @@ onUnmounted(() => {
     width: 260px;
     right: -20px;
   }
-  
+
   .panel-summary {
     grid-template-columns: 1fr;
     gap: 4px;
   }
-  
+
   .summary-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
   }
-  
+
   .summary-label {
     margin-bottom: 0;
   }
 }
-</style> 
+</style>

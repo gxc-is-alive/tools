@@ -34,28 +34,45 @@
             <button @click="setTimer(60)">60m</button>
           </div>
           <div class="controls">
-            <button v-if="!isRunning" @click="startTimer" :disabled="timeLeft === 0" class="start-btn">
+            <button
+              v-if="!isRunning"
+              @click="startTimer"
+              :disabled="timeLeft === 0"
+              class="start-btn"
+            >
               <i class="fas fa-play"></i>
             </button>
-            <button v-if="isRunning && !isPaused" @click="pauseTimer" class="pause-btn">
+            <button
+              v-if="isRunning && !isPaused"
+              @click="pauseTimer"
+              class="pause-btn"
+            >
               <i class="fas fa-pause"></i>
             </button>
             <button v-if="isPaused" @click="resumeTimer" class="resume-btn">
               <i class="fas fa-play"></i>
             </button>
-            <button @click="resetTimer" :disabled="timeLeft === initialTime" class="reset-btn">
+            <button
+              @click="resetTimer"
+              :disabled="timeLeft === initialTime"
+              class="reset-btn"
+            >
               <i class="fas fa-undo"></i>
             </button>
           </div>
         </div>
       </div>
-      <audio ref="notificationSound" src="/notification.mp3" preload="auto"></audio>
+      <audio
+        ref="notificationSound"
+        src="/notification.mp3"
+        preload="auto"
+      ></audio>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onUnmounted, nextTick } from 'vue';
+import { ref, computed, onUnmounted, nextTick } from "vue";
 
 const isOpen = ref(false);
 const initialTime = ref(25 * 60);
@@ -76,7 +93,10 @@ const togglePanel = () => {
 const formattedTime = computed(() => {
   const minutes = Math.floor(timeLeft.value / 60);
   const seconds = timeLeft.value % 60;
-  return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+  return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(
+    2,
+    "0"
+  )}`;
 });
 
 const editTime = async () => {
@@ -97,14 +117,14 @@ const finishEditing = () => {
 };
 
 const requestNotificationPermission = async () => {
-  if (!('Notification' in window)) {
-    alert('此浏览器不支持桌面通知');
+  if (!("Notification" in window)) {
+    alert("此浏览器不支持桌面通知");
     return;
   }
-  if (Notification.permission !== 'granted') {
+  if (Notification.permission !== "granted") {
     const permission = await Notification.requestPermission();
-    if (permission !== 'granted') {
-      alert('您拒绝了通知权限，时间结束后将无法收到桌面提醒。');
+    if (permission !== "granted") {
+      alert("您拒绝了通知权限，时间结束后将无法收到桌面提醒。");
     }
   }
 };
@@ -120,7 +140,7 @@ const startTimer = () => {
   requestNotificationPermission();
   isRunning.value = true;
   isPaused.value = false;
-  
+
   timerId.value = setInterval(() => {
     if (timeLeft.value > 0) {
       timeLeft.value--;
@@ -156,9 +176,9 @@ const finishTimer = () => {
   document.title = `时间到！ - ${originalTitle}`;
 
   // 桌面通知
-  new Notification('时间到！', {
-    body: '专注时间已结束，休息一下吧！',
-    icon: '/favicon.ico' 
+  new Notification("时间到！", {
+    body: "专注时间已结束，休息一下吧！",
+    icon: "/favicon.ico",
   });
 
   // 播放声音
@@ -166,7 +186,7 @@ const finishTimer = () => {
 
   // 恢复默认时间
   setTimeout(() => {
-      resetTimer();
+    resetTimer();
   }, 3000);
 };
 
@@ -178,7 +198,7 @@ onUnmounted(() => {
 
 <style scoped>
 .zen-timer-widget {
-  position: relative;
+  /* position: relative; */
 }
 
 .timer-toggle {
@@ -192,13 +212,13 @@ onUnmounted(() => {
   justify-content: center;
   font-size: 24px;
   cursor: pointer;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
   transition: all 0.3s ease;
 }
 
 .timer-toggle:hover {
   transform: scale(1.1);
-  box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
 }
 
 .timer-panel {
@@ -208,7 +228,7 @@ onUnmounted(() => {
   width: 320px;
   background-color: white;
   border-radius: 15px;
-  box-shadow: 0 5px 25px rgba(0,0,0,0.2);
+  box-shadow: 0 5px 25px rgba(0, 0, 0, 0.2);
   transform: translateY(20px) scale(0.95);
   opacity: 0;
   visibility: hidden;
@@ -272,16 +292,17 @@ onUnmounted(() => {
   text-align: center;
 }
 
-.timer-display, .time-input {
-  font-family: 'Roboto Mono', monospace;
+.timer-display,
+.time-input {
+  font-family: "Roboto Mono", monospace;
   font-size: 56px;
   font-weight: 500;
   color: #333;
   cursor: pointer;
 }
 
-.time-input { 
-  width: 160px; 
+.time-input {
+  width: 160px;
   border: none;
   outline: none;
   background: transparent;
@@ -301,7 +322,8 @@ onUnmounted(() => {
   width: 100%;
 }
 
-.preset-buttons, .controls {
+.preset-buttons,
+.controls {
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
@@ -323,7 +345,7 @@ onUnmounted(() => {
 .preset-buttons button:hover {
   background: #e9ecef;
   transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
 }
 
 .controls button {
@@ -346,34 +368,53 @@ onUnmounted(() => {
   border-color: #e9ecef !important;
 }
 
-.start-btn { background: #28a745 !important; color: white; }
-.start-btn:hover { background: #218838 !important; }
+.start-btn {
+  background: #28a745 !important;
+  color: white;
+}
+.start-btn:hover {
+  background: #218838 !important;
+}
 
-.pause-btn { background: #ffc107 !important; color: #212529; }
-.pause-btn:hover { background: #e0a800 !important; }
+.pause-btn {
+  background: #ffc107 !important;
+  color: #212529;
+}
+.pause-btn:hover {
+  background: #e0a800 !important;
+}
 
-.resume-btn { background: #17a2b8 !important; color: white; }
-.resume-btn:hover { background: #138496 !important; }
+.resume-btn {
+  background: #17a2b8 !important;
+  color: white;
+}
+.resume-btn:hover {
+  background: #138496 !important;
+}
 
-.reset-btn { background: #f1f3f5 !important; color: #555; border: 1px solid #dee2e6 !important;}
-.reset-btn:hover { background: #e9ecef !important; }
+.reset-btn {
+  background: #f1f3f5 !important;
+  color: #555;
+  border: 1px solid #dee2e6 !important;
+}
+.reset-btn:hover {
+  background: #e9ecef !important;
+}
 
 @media (max-width: 480px) {
-  .zen-timer-widget {
-    right: 15px;
-    bottom: 155px;
-  }
   .timer-toggle {
     width: 50px;
     height: 50px;
+    font-size: 20px;
   }
   .timer-panel {
     width: calc(100vw - 30px);
     right: -15px;
     bottom: 60px;
   }
-  .timer-display, .time-input {
+  .timer-display,
+  .time-input {
     font-size: 48px;
   }
 }
-</style> 
+</style>

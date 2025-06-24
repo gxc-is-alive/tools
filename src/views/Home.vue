@@ -12,8 +12,8 @@
 
       <main class="tools-section">
         <div class="tools-grid">
-          <div 
-            v-for="tool in tools" 
+          <div
+            v-for="tool in tools"
             :key="tool.id"
             class="tool-card"
             @click="navigateTo(tool.path)"
@@ -52,48 +52,62 @@
 </template>
 
 <script setup>
-import { computed, ref, onMounted, onUnmounted } from 'vue';
-import { useRouter } from 'vue-router';
-import SearchBar from '../components/SearchBar.vue';
+import { computed, ref, onMounted, onUnmounted } from "vue";
+import { useRouter } from "vue-router";
+import SearchBar from "../components/SearchBar.vue";
 
 const router = useRouter();
 
 const tools = computed(() => [
   {
     id: 1,
-    name: 'WebP 转换器',
-    description: '批量将图片转换为WebP格式，支持拖拽上传和批量处理',
-    icon: 'fas fa-images',
-    path: '/webp-converter'
+    name: "WebP 转换器",
+    description: "批量将图片转换为WebP格式，支持拖拽上传和批量处理",
+    icon: "fas fa-images",
+    path: "/webp-converter",
   },
   {
     id: 2,
-    name: '文本比对',
-    description: '智能比较两段文本的差异，高亮显示变化内容',
-    icon: 'fas fa-file-alt',
-    path: '/text-diff'
+    name: "文本比对",
+    description: "智能比较两段文本的差异，高亮显示变化内容",
+    icon: "fas fa-file-alt",
+    path: "/text-diff",
   },
   {
     id: 3,
-    name: '时间戳转换',
-    description: '在时间戳和日期格式之间进行快速转换',
-    icon: 'fas fa-clock',
-    path: '/timestamp'
+    name: "JSON美化",
+    description: "格式化JSON数据，支持树状展示、折叠和复制功能",
+    icon: "fas fa-code",
+    path: "/json-prettify",
   },
   {
     id: 4,
-    name: 'Base64 编解码',
-    description: '文本和Base64编码之间的相互转换，支持图片预览',
-    icon: 'fas fa-code',
-    path: '/base64'
+    name: "错误监控",
+    description: "实时监控和查看应用错误，支持错误上报和统计分析",
+    icon: "fas fa-bug",
+    path: "/error-monitor",
   },
   {
     id: 5,
-    name: 'API 请求测试',
-    description: '轻量级的HTTP请求客户端，支持多种请求方式',
-    icon: 'fas fa-paper-plane',
-    path: '/api-tester'
-  }
+    name: "时间戳转换",
+    description: "在时间戳和日期格式之间进行快速转换",
+    icon: "fas fa-clock",
+    path: "/timestamp",
+  },
+  {
+    id: 6,
+    name: "Base64 编解码",
+    description: "文本和Base64编码之间的相互转换，支持图片预览",
+    icon: "fas fa-file-code",
+    path: "/base64",
+  },
+  {
+    id: 7,
+    name: "API 请求测试",
+    description: "轻量级的HTTP请求客户端，支持多种请求方式",
+    icon: "fas fa-paper-plane",
+    path: "/api-tester",
+  },
 ]);
 
 const navigateTo = (path) => {
@@ -101,37 +115,37 @@ const navigateTo = (path) => {
 };
 
 // 主题状态
-const currentTheme = ref('default-theme');
+const currentTheme = ref("default-theme");
 
 // 主题判断
 const isTechTheme = computed(() => {
-  return currentTheme.value === 'tech-theme';
+  return currentTheme.value === "tech-theme";
 });
 
 // 监听主题变化
 function updateTheme() {
-  const theme = localStorage.getItem('theme') || 'default-theme';
+  const theme = localStorage.getItem("theme") || "default-theme";
   currentTheme.value = theme;
 }
 
 // 监听 localStorage 变化
 function handleStorageChange(e) {
-  if (e.key === 'theme') {
+  if (e.key === "theme") {
     updateTheme();
   }
 }
 
 onMounted(() => {
   updateTheme();
-  window.addEventListener('storage', handleStorageChange);
-  
+  window.addEventListener("storage", handleStorageChange);
+
   // 监听自定义事件（用于同页面内的主题切换）
-  window.addEventListener('themeChanged', updateTheme);
+  window.addEventListener("themeChanged", updateTheme);
 });
 
 onUnmounted(() => {
-  window.removeEventListener('storage', handleStorageChange);
-  window.removeEventListener('themeChanged', updateTheme);
+  window.removeEventListener("storage", handleStorageChange);
+  window.removeEventListener("themeChanged", updateTheme);
 });
 </script>
 
@@ -145,8 +159,11 @@ onUnmounted(() => {
 
 .home-container.tech-theme {
   background: #0a1833;
-  background-image:
-    radial-gradient(circle at 20% 80%, #1e90ff 0%, transparent 50%),
+  background-image: radial-gradient(
+      circle at 20% 80%,
+      #1e90ff 0%,
+      transparent 50%
+    ),
     radial-gradient(circle at 80% 20%, #00e0ff 0%, transparent 50%),
     radial-gradient(circle at 40% 40%, #7f7fff 0%, transparent 50%);
 }
@@ -199,12 +216,18 @@ onUnmounted(() => {
 }
 
 @keyframes float {
-  0%, 100% { transform: translateY(0px) rotate(0deg); }
-  50% { transform: translateY(-20px) rotate(180deg); }
+  0%,
+  100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-20px) rotate(180deg);
+  }
 }
 
 @keyframes techFloat {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0) rotate(0deg);
     opacity: 0.18;
   }
@@ -238,7 +261,7 @@ onUnmounted(() => {
   font-size: 3.5rem;
   font-weight: 700;
   margin-bottom: 20px;
-  text-shadow: 0 4px 8px rgba(0,0,0,0.3);
+  text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -318,7 +341,7 @@ onUnmounted(() => {
   padding: 0;
   cursor: pointer;
   overflow: hidden;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   height: 260px;
   min-height: 200px;
@@ -326,7 +349,7 @@ onUnmounted(() => {
 
 .tool-card:hover {
   transform: translateY(-10px) scale(1.02);
-  box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
 }
 
 .card-background {
@@ -428,7 +451,12 @@ onUnmounted(() => {
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
   transition: left 0.5s ease;
 }
 
@@ -478,7 +506,7 @@ onUnmounted(() => {
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 1.5rem;
   }
-  
+
   .hero-title {
     font-size: 3rem;
   }
@@ -488,78 +516,78 @@ onUnmounted(() => {
   .hero-section {
     padding: 60px 15px 40px;
   }
-  
+
   .hero-title {
     font-size: 2.5rem;
     flex-direction: column;
     gap: 10px;
   }
-  
+
   .hero-subtitle {
     font-size: 1.1rem;
   }
-  
+
   .hero-stats {
     gap: 30px;
   }
-  
+
   .stat-number {
     font-size: 2rem;
   }
-  
+
   .stat-item {
     min-width: 100px;
   }
-  
+
   .tools-section {
     padding: 1.5rem 0.5rem;
   }
-  
+
   .section-header {
     padding: 0 0.5rem;
   }
-  
+
   .section-header h2 {
     font-size: 2rem;
   }
-  
+
   .section-header p {
     font-size: 1rem;
   }
-  
+
   .tools-grid {
     grid-template-columns: 1fr;
     gap: 1rem;
     padding: 0 0.5rem;
   }
-  
+
   .tool-card {
     height: auto;
     min-height: 180px;
   }
-  
+
   .card-content {
     padding: 25px 20px;
   }
-  
+
   .tool-icon {
     width: 60px;
     height: 60px;
   }
-  
+
   .tool-icon i {
     font-size: 40px;
   }
-  
+
   .tool-name {
     font-size: 1.3rem;
   }
-  
+
   .footer-content {
     flex-direction: column;
     text-align: center;
   }
-  
+
   .footer-links {
     justify-content: center;
     gap: 20px;
@@ -570,71 +598,71 @@ onUnmounted(() => {
   .hero-section {
     padding: 50px 10px 30px;
   }
-  
+
   .hero-title {
     font-size: 2rem;
   }
-  
+
   .hero-subtitle {
     font-size: 1rem;
     margin-bottom: 30px;
   }
-  
+
   .hero-stats {
     flex-direction: column;
     gap: 20px;
   }
-  
+
   .stat-item {
     min-width: auto;
   }
-  
+
   .tools-section {
     padding: 1rem 0;
   }
-  
+
   .section-header {
     padding: 0 10px;
   }
-  
+
   .section-header h2 {
     font-size: 1.8rem;
   }
-  
+
   .tools-grid {
     padding: 0 10px;
   }
-  
+
   .tool-card {
     margin: 0;
   }
-  
+
   .card-content {
     padding: 20px 15px;
   }
-  
+
   .tool-icon {
     width: 50px;
     height: 50px;
     margin-bottom: 15px;
   }
-  
+
   .tool-icon i {
     font-size: 35px;
   }
-  
+
   .tool-name {
     font-size: 1.2rem;
   }
-  
+
   .tool-description {
     font-size: 0.9rem;
   }
-  
+
   .footer-section {
     padding: 20px 10px;
   }
-  
+
   .footer-links {
     gap: 15px;
   }
@@ -646,4 +674,4 @@ onUnmounted(() => {
     margin-bottom: 80px; /* 为固定定位的SiteStatusChecker留出空间 */
   }
 }
-</style> 
+</style>
