@@ -11,9 +11,24 @@ import { dirname } from "path";
 import axios from "axios";
 import databaseService from "./src/services/database.js";
 import { v4 as uuidv4 } from "uuid";
+import os from "os";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+
+// 获取本机IP地址
+function getLocalIPAddress() {
+  const interfaces = os.networkInterfaces();
+  for (const name of Object.keys(interfaces)) {
+    for (const iface of interfaces[name]) {
+      // 跳过内部地址和非IPv4地址
+      if (iface.family === "IPv4" && !iface.internal) {
+        return iface.address;
+      }
+    }
+  }
+  return "localhost";
+}
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -23,12 +38,21 @@ let errorReports = [];
 
 // CORS配置
 const corsOptions = {
-  origin: [
-    "http://localhost:3000", // Vue3开发服务器
-    "http://localhost:3001", // 生产环境
-    "http://127.0.0.1:3000",
-    "http://127.0.0.1:3001",
-  ],
+  origin: function (origin, callback) {
+    // 允许所有localhost和127.0.0.1的请求
+    if (
+      !origin ||
+      origin.includes("localhost") ||
+      origin.includes("127.0.0.1") ||
+      origin.match(/^https?:\/\/192\.168\.\d+\.\d+:\d+$/) ||
+      origin.match(/^https?:\/\/10\.\d+\.\d+\.\d+:\d+$/) ||
+      origin.match(/^https?:\/\/172\.(1[6-9]|2\d|3[01])\.\d+\.\d+:\d+$/)
+    ) {
+      callback(null, true);
+    } else {
+      callback(null, true); // 在开发环境中允许所有来源
+    }
+  },
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
   credentials: true,
@@ -1092,6 +1116,206 @@ app.get("/api/storage/export", async (req, res) => {
   }
 });
 
+// ============ 备忘录 API ============
+
+// 获取所有备忘录房间
+app.get("/api/memo/rooms", async (req, res) => {
+  try {
+    const rooms = await databaseService.getAllMemoRooms();
+    res.json({ success: true, data: rooms });
+  } catch (error) {
+    console.error("获取备忘录房间失败:", error);
+    res.status(500).json({ success: false, message: "获取失败" });
+  }
+});
+
+// 创建或访问备忘录房间
+app.post("/api/memo/room/:roomId", async (req, res) => {
+  try {
+    const { roomId } = req.params;
+    const { roomName } = req.body;
+
+    const room = await databaseService.createOrAccessMemoRoom(roomId, roomName);
+    res.json({ success: true, data: room });
+  } catch (error) {
+    console.error("创建或访问备忘录房间失败:", error);
+    res.status(500).json({ success: false, message: "操作失败" });
+  }
+});
+
+// 获取指定房间的所有备忘录
+app.get("/api/memo/items/:roomId", async (req, res) => {
+  try {
+    const { roomId } = req.params;
+    const memos = await databaseService.getAllMemos(roomId);
+    res.json({ success: true, data: memos });
+  } catch (error) {
+    console.error("获取备忘录失败:", error);
+    res.status(500).json({ success: false, message: "获取失败" });
+  }
+});
+
+// 创建备忘录
+app.post("/api/memo/items", async (req, res) => {
+  try {
+    const {
+      uuid,
+      roomId,
+      title,
+      content,
+      contentType,
+      isTaskList,
+      tags,
+      priority,
+    } = req.body;
+
+    if (!uuid || !roomId || !title) {
+      return res.status(400).json({ success: false, message: "缺少必要参数" });
+    }
+
+    const memo = await databaseService.createMemo({
+      uuid,
+      roomId,
+      title,
+      content: content || "",
+      contentType: contentType || "markdown",
+      isTaskList: isTaskList || false,
+      tags: tags || [],
+      priority: priority || 0,
+    });
+
+    res.json({ success: true, data: memo });
+  } catch (error) {
+    console.error("创建备忘录失败:", error);
+    res.status(500).json({ success: false, message: "创建失败" });
+  }
+});
+
+// 获取单个备忘录
+app.get("/api/memo/item/:uuid", async (req, res) => {
+  try {
+    const { uuid } = req.params;
+    const memo = await databaseService.getMemoByUuid(uuid);
+
+    if (!memo) {
+      return res.status(404).json({ success: false, message: "备忘录不存在" });
+    }
+
+    res.json({ success: true, data: memo });
+  } catch (error) {
+    console.error("获取备忘录失败:", error);
+    res.status(500).json({ success: false, message: "获取失败" });
+  }
+});
+
+// 更新备忘录
+app.put("/api/memo/item/:uuid", async (req, res) => {
+  try {
+    const { uuid } = req.params;
+    const { title, content, contentType, tags, priority, isPinned } = req.body;
+
+    const memo = await databaseService.updateMemo(uuid, {
+      title,
+      content,
+      contentType,
+      tags,
+      priority,
+      isPinned,
+    });
+
+    if (!memo) {
+      return res.status(404).json({ success: false, message: "备忘录不存在" });
+    }
+
+    res.json({ success: true, data: memo });
+  } catch (error) {
+    console.error("更新备忘录失败:", error);
+    res.status(500).json({ success: false, message: "更新失败" });
+  }
+});
+
+// 删除备忘录
+app.delete("/api/memo/item/:uuid", async (req, res) => {
+  try {
+    const { uuid } = req.params;
+    const result = await databaseService.deleteMemo(uuid);
+    res.json({ success: true, data: result });
+  } catch (error) {
+    console.error("删除备忘录失败:", error);
+    res.status(500).json({ success: false, message: "删除失败" });
+  }
+});
+
+// 添加任务项目
+app.post("/api/memo/task", async (req, res) => {
+  try {
+    const { memoUuid, content, orderIndex } = req.body;
+
+    if (!memoUuid || !content) {
+      return res.status(400).json({ success: false, message: "缺少必要参数" });
+    }
+
+    const task = await databaseService.addTaskItem(
+      memoUuid,
+      content,
+      orderIndex
+    );
+    res.json({ success: true, data: task });
+  } catch (error) {
+    console.error("添加任务项目失败:", error);
+    res.status(500).json({ success: false, message: "添加失败" });
+  }
+});
+
+// 更新任务项目
+app.put("/api/memo/task/:taskId", async (req, res) => {
+  try {
+    const { taskId } = req.params;
+    const { content, isCompleted, orderIndex } = req.body;
+
+    const task = await databaseService.updateTaskItem(taskId, {
+      content,
+      isCompleted,
+      orderIndex,
+    });
+
+    if (!task) {
+      return res
+        .status(404)
+        .json({ success: false, message: "任务项目不存在" });
+    }
+
+    res.json({ success: true, data: task });
+  } catch (error) {
+    console.error("更新任务项目失败:", error);
+    res.status(500).json({ success: false, message: "更新失败" });
+  }
+});
+
+// 删除任务项目
+app.delete("/api/memo/task/:taskId", async (req, res) => {
+  try {
+    const { taskId } = req.params;
+    const result = await databaseService.deleteTaskItem(taskId);
+    res.json({ success: true, data: result });
+  } catch (error) {
+    console.error("删除任务项目失败:", error);
+    res.status(500).json({ success: false, message: "删除失败" });
+  }
+});
+
+// 获取备忘录统计
+app.get("/api/memo/stats/:roomId", async (req, res) => {
+  try {
+    const { roomId } = req.params;
+    const stats = await databaseService.getMemoStats(roomId);
+    res.json({ success: true, data: stats });
+  } catch (error) {
+    console.error("获取备忘录统计失败:", error);
+    res.status(500).json({ success: false, message: "获取失败" });
+  }
+});
+
 // 静态文件服务 - 放在API路由之后
 app.use(express.static("dist"));
 app.use(express.static("public")); // 保留原有静态文件
@@ -1112,7 +1336,13 @@ app.get("*", (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`服务器运行在 http://localhost:${PORT}`);
-  console.log(`Vue3开发服务器运行在 http://localhost:3000`);
+app.listen(PORT, "0.0.0.0", () => {
+  const localIP = getLocalIPAddress();
+  console.log(`🚀 后端API服务器运行在 http://localhost:${PORT}`);
+  console.log(`🎨 Vue3开发服务器运行在 http://localhost:3000`);
+  console.log(`\n🌐 局域网访问地址:`);
+  console.log(`   📡 后端API服务器: http://${localIP}:${PORT}`);
+  console.log(`   🎯 前端开发服务器: http://${localIP}:3000`);
+  console.log(`\n📱 移动设备可通过以上地址访问`);
+  console.log(`\n💡 如果端口冲突，前端会自动切换到其他端口`);
 });

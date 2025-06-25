@@ -8,6 +8,7 @@ import ApiTester from "./views/ApiTester.vue";
 import JsonPrettify from "./views/JsonPrettify.vue";
 import ErrorMonitor from "./views/ErrorMonitor.vue";
 import Storage from "./views/Storage.vue";
+import Memo from "./views/Memo.vue";
 
 const routes = [
   { path: "/", component: Home },
@@ -19,6 +20,7 @@ const routes = [
   { path: "/api-tester", component: ApiTester },
   { path: "/error-monitor", component: ErrorMonitor },
   { path: "/storage", component: Storage },
+  { path: "/memo", component: Memo },
 ];
 
 const router = createRouter({

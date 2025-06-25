@@ -23,7 +23,7 @@
             ref="searchInput"
             type="text"
             v-model.trim="query"
-            placeholder="搜索内容或输入网址..."
+            placeholder="搜索内容或输入网址（@开头强制作为URL）..."
             class="search-input"
             @input="onInputChange"
             @focus="handleFocus"
@@ -433,14 +433,20 @@ const setSearchEngine = (engine) => {
 
 // URL验证
 const isValidUrl = (string) => {
-  const urlPattern =
-    /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/i;
-  const domainPattern = /^[\da-z\.-]+\.[a-z\.]{2,6}$/i;
-
-  if (string.startsWith("http://") || string.startsWith("https://")) {
-    return urlPattern.test(string);
+  try {
+    // 使用更安全的URL验证方法
+    if (string.startsWith("http://") || string.startsWith("https://")) {
+      new URL(string);
+      return true;
+    } else {
+      // 简单的域名验证
+      const domainPattern =
+        /^[a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9]?\.[a-zA-Z]{2,}$/;
+      return domainPattern.test(string);
+    }
+  } catch (e) {
+    return false;
   }
-  return domainPattern.test(string);
 };
 
 // 输入变化处理
@@ -499,14 +505,27 @@ const updateSuggestions = () => {
 
   // 搜索建议
   if (searchTerm.length > 0) {
-    searchSuggestions.value = [
-      {
-        type: "search",
-        title: `搜索 "${query.value}"`,
-        url: null,
-        data: { query: query.value },
-      },
-    ];
+    if (query.value.trim().startsWith("@")) {
+      // 如果以@开头，显示URL建议
+      const urlPart = query.value.trim().substring(1);
+      searchSuggestions.value = [
+        {
+          type: "url",
+          title: `打开网址: ${urlPart}`,
+          url: urlPart,
+          data: { query: query.value },
+        },
+      ];
+    } else {
+      searchSuggestions.value = [
+        {
+          type: "search",
+          title: `搜索 "${query.value}"`,
+          url: null,
+          data: { query: query.value },
+        },
+      ];
+    }
   } else {
     searchSuggestions.value = [];
   }
@@ -521,6 +540,8 @@ const getSuggestionIcon = (type) => {
       return "fas fa-bookmark";
     case "search":
       return "fas fa-search";
+    case "url":
+      return "fas fa-external-link-alt";
     default:
       return "fas fa-globe";
   }
@@ -668,9 +689,21 @@ const closeSuggestions = () => {
 const performSearch = () => {
   if (!query.value) return;
 
+  let searchQuery = query.value.trim();
+
+  // 检查是否以@开头，表示强制作为URL处理
+  if (searchQuery.startsWith("@")) {
+    let url = searchQuery.substring(1); // 去掉@符号
+    if (!url.startsWith("http://") && !url.startsWith("https://")) {
+      url = "https://" + url;
+    }
+    openUrl(url);
+    return;
+  }
+
   // 检查是否是URL
-  if (isValidUrl(query.value)) {
-    let url = query.value;
+  if (isValidUrl(searchQuery)) {
+    let url = searchQuery;
     if (!url.startsWith("http://") && !url.startsWith("https://")) {
       url = "https://" + url;
     }
@@ -681,16 +714,16 @@ const performSearch = () => {
   // 执行搜索
   const urls = {
     google: `https://www.google.com/search?q=${encodeURIComponent(
-      query.value
+      searchQuery
     )}`,
-    baidu: `https://www.baidu.com/s?wd=${encodeURIComponent(query.value)}`,
+    baidu: `https://www.baidu.com/s?wd=${encodeURIComponent(searchQuery)}`,
   };
 
   const searchUrl = urls[searchEngine.value];
   openUrl(searchUrl);
 
   // 保存到历史记录
-  saveToHistory({ query: query.value, url: searchUrl });
+  saveToHistory({ query: searchQuery, url: searchUrl });
   closeSuggestions();
 };
 

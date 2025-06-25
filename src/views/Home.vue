@@ -115,6 +115,13 @@ const tools = computed(() => [
     icon: "fas fa-archive",
     path: "/storage",
   },
+  {
+    id: 9,
+    name: "备忘录",
+    description: "支持房间概念的备忘录工具，任务清单模式，富文本和Markdown语法",
+    icon: "fas fa-sticky-note",
+    path: "/memo",
+  },
 ]);
 
 const navigateTo = (path) => {

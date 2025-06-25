@@ -100,12 +100,55 @@ class DatabaseService {
       )
     `;
 
+    const createMemoRoomsTable = `
+      CREATE TABLE IF NOT EXISTS memo_rooms (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        room_id TEXT UNIQUE NOT NULL,
+        room_name TEXT,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        last_accessed DATETIME DEFAULT CURRENT_TIMESTAMP
+      )
+    `;
+
+    const createMemosTable = `
+      CREATE TABLE IF NOT EXISTS memos (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        uuid TEXT UNIQUE NOT NULL,
+        room_id TEXT NOT NULL,
+        title TEXT NOT NULL,
+        content TEXT NOT NULL,
+        content_type TEXT DEFAULT 'markdown',
+        is_task_list BOOLEAN DEFAULT 0,
+        tags TEXT,
+        priority INTEGER DEFAULT 0,
+        is_pinned BOOLEAN DEFAULT 0,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      )
+    `;
+
+    const createTaskItemsTable = `
+      CREATE TABLE IF NOT EXISTS task_items (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        memo_uuid TEXT NOT NULL,
+        content TEXT NOT NULL,
+        is_completed BOOLEAN DEFAULT 0,
+        order_index INTEGER DEFAULT 0,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (memo_uuid) REFERENCES memos(uuid) ON DELETE CASCADE
+      )
+    `;
+
     try {
       await this.dbRun(createStorageItemsTable);
       await this.dbRun(createRoomsTable);
       await this.dbRun(createSyncLogTable);
       await this.dbRun(createVisitSessionsTable);
       await this.dbRun(createPageViewsTable);
+      await this.dbRun(createMemoRoomsTable);
+      await this.dbRun(createMemosTable);
+      await this.dbRun(createTaskItemsTable);
       console.log("数据库表创建成功");
     } catch (error) {
       console.error("创建数据库表失败:", error);
@@ -726,6 +769,308 @@ class DatabaseService {
           console.log("数据库连接已关闭");
         }
       });
+    }
+  }
+
+  // ============ 备忘录相关方法 ============
+
+  // 创建或访问备忘录房间
+  async createOrAccessMemoRoom(roomId, roomName = null) {
+    try {
+      // 检查房间是否存在
+      let room = await this.dbGet(
+        "SELECT * FROM memo_rooms WHERE room_id = ?",
+        [roomId]
+      );
+
+      if (room) {
+        // 更新最后访问时间
+        await this.dbRun(
+          "UPDATE memo_rooms SET last_accessed = CURRENT_TIMESTAMP WHERE room_id = ?",
+          [roomId]
+        );
+      } else {
+        // 创建新房间
+        await this.dbRun(
+          "INSERT INTO memo_rooms (room_id, room_name) VALUES (?, ?)",
+          [roomId, roomName || `备忘录房间${roomId}`]
+        );
+        room = await this.dbGet("SELECT * FROM memo_rooms WHERE room_id = ?", [
+          roomId,
+        ]);
+      }
+
+      return room;
+    } catch (error) {
+      console.error("创建或访问备忘录房间失败:", error);
+      throw error;
+    }
+  }
+
+  // 获取所有备忘录房间
+  async getAllMemoRooms() {
+    try {
+      const rooms = await this.dbAll(`
+        SELECT mr.*, COUNT(m.id) as memo_count
+        FROM memo_rooms mr
+        LEFT JOIN memos m ON mr.room_id = m.room_id
+        GROUP BY mr.room_id
+        ORDER BY mr.last_accessed DESC
+      `);
+      return rooms;
+    } catch (error) {
+      console.error("获取备忘录房间失败:", error);
+      throw error;
+    }
+  }
+
+  // 获取指定房间的所有备忘录
+  async getAllMemos(roomId) {
+    try {
+      const memos = await this.dbAll(
+        `
+        SELECT * FROM memos 
+        WHERE room_id = ?
+        ORDER BY is_pinned DESC, updated_at DESC
+      `,
+        [roomId]
+      );
+
+      // 获取任务清单项目
+      for (let memo of memos) {
+        if (memo.is_task_list) {
+          memo.tasks = await this.dbAll(
+            `
+            SELECT * FROM task_items 
+            WHERE memo_uuid = ?
+            ORDER BY order_index ASC, created_at ASC
+          `,
+            [memo.uuid]
+          );
+        }
+        memo.tags = memo.tags ? JSON.parse(memo.tags) : [];
+      }
+
+      return memos;
+    } catch (error) {
+      console.error("获取备忘录失败:", error);
+      throw error;
+    }
+  }
+
+  // 创建备忘录
+  async createMemo(data) {
+    const {
+      uuid,
+      roomId,
+      title,
+      content,
+      contentType = "markdown",
+      isTaskList = false,
+      tags = [],
+      priority = 0,
+    } = data;
+    try {
+      await this.dbRun(
+        `
+        INSERT INTO memos (uuid, room_id, title, content, content_type, is_task_list, tags, priority)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      `,
+        [
+          uuid,
+          roomId,
+          title,
+          content,
+          contentType,
+          isTaskList ? 1 : 0,
+          JSON.stringify(tags),
+          priority,
+        ]
+      );
+
+      return this.getMemoByUuid(uuid);
+    } catch (error) {
+      console.error("创建备忘录失败:", error);
+      throw error;
+    }
+  }
+
+  // 获取单个备忘录
+  async getMemoByUuid(uuid) {
+    try {
+      const memo = await this.dbGet("SELECT * FROM memos WHERE uuid = ?", [
+        uuid,
+      ]);
+      if (!memo) return null;
+
+      if (memo.is_task_list) {
+        memo.tasks = await this.dbAll(
+          `
+          SELECT * FROM task_items 
+          WHERE memo_uuid = ?
+          ORDER BY order_index ASC, created_at ASC
+        `,
+          [uuid]
+        );
+      }
+      memo.tags = memo.tags ? JSON.parse(memo.tags) : [];
+      return memo;
+    } catch (error) {
+      console.error("获取备忘录失败:", error);
+      throw error;
+    }
+  }
+
+  // 更新备忘录
+  async updateMemo(uuid, data) {
+    const { title, content, contentType, tags, priority, isPinned } = data;
+    try {
+      await this.dbRun(
+        `
+        UPDATE memos 
+        SET title = ?, content = ?, content_type = ?, tags = ?, priority = ?, is_pinned = ?, updated_at = CURRENT_TIMESTAMP
+        WHERE uuid = ?
+      `,
+        [
+          title,
+          content,
+          contentType,
+          JSON.stringify(tags),
+          priority,
+          isPinned ? 1 : 0,
+          uuid,
+        ]
+      );
+
+      return this.getMemoByUuid(uuid);
+    } catch (error) {
+      console.error("更新备忘录失败:", error);
+      throw error;
+    }
+  }
+
+  // 删除备忘录
+  async deleteMemo(uuid) {
+    try {
+      // 先删除关联的任务项目
+      await this.dbRun("DELETE FROM task_items WHERE memo_uuid = ?", [uuid]);
+      // 删除备忘录
+      await this.dbRun("DELETE FROM memos WHERE uuid = ?", [uuid]);
+      return true;
+    } catch (error) {
+      console.error("删除备忘录失败:", error);
+      throw error;
+    }
+  }
+
+  // 添加任务项目
+  async addTaskItem(memoUuid, content, orderIndex = 0) {
+    try {
+      await this.dbRun(
+        `
+        INSERT INTO task_items (memo_uuid, content, order_index)
+        VALUES (?, ?, ?)
+      `,
+        [memoUuid, content, orderIndex]
+      );
+
+      // 获取最新插入的任务项目
+      return this.dbGet(
+        `
+        SELECT * FROM task_items 
+        WHERE memo_uuid = ? AND content = ? AND order_index = ?
+        ORDER BY created_at DESC, id DESC
+        LIMIT 1
+      `,
+        [memoUuid, content, orderIndex]
+      );
+    } catch (error) {
+      console.error("添加任务项目失败:", error);
+      throw error;
+    }
+  }
+
+  // 更新任务项目
+  async updateTaskItem(taskId, data) {
+    const { content, isCompleted, orderIndex } = data;
+    try {
+      await this.dbRun(
+        `
+        UPDATE task_items 
+        SET content = ?, is_completed = ?, order_index = ?, updated_at = CURRENT_TIMESTAMP
+        WHERE id = ?
+      `,
+        [content, isCompleted ? 1 : 0, orderIndex, taskId]
+      );
+
+      return this.dbGet("SELECT * FROM task_items WHERE id = ?", [taskId]);
+    } catch (error) {
+      console.error("更新任务项目失败:", error);
+      throw error;
+    }
+  }
+
+  // 删除任务项目
+  async deleteTaskItem(taskId) {
+    try {
+      await this.dbRun("DELETE FROM task_items WHERE id = ?", [taskId]);
+      return true;
+    } catch (error) {
+      console.error("删除任务项目失败:", error);
+      throw error;
+    }
+  }
+
+  // 获取备忘录统计
+  async getMemoStats(roomId) {
+    try {
+      const totalMemos = await this.dbGet(
+        `
+        SELECT COUNT(*) as count FROM memos WHERE room_id = ?
+      `,
+        [roomId]
+      );
+
+      const taskListCount = await this.dbGet(
+        `
+        SELECT COUNT(*) as count FROM memos WHERE room_id = ? AND is_task_list = 1
+      `,
+        [roomId]
+      );
+
+      const completedTasks = await this.dbGet(
+        `
+        SELECT COUNT(*) as count 
+        FROM task_items ti 
+        JOIN memos m ON ti.memo_uuid = m.uuid 
+        WHERE m.room_id = ? AND ti.is_completed = 1
+      `,
+        [roomId]
+      );
+
+      const totalTasks = await this.dbGet(
+        `
+        SELECT COUNT(*) as count 
+        FROM task_items ti 
+        JOIN memos m ON ti.memo_uuid = m.uuid 
+        WHERE m.room_id = ?
+      `,
+        [roomId]
+      );
+
+      return {
+        totalMemos: totalMemos.count,
+        taskListCount: taskListCount.count,
+        completedTasks: completedTasks.count,
+        totalTasks: totalTasks.count,
+        completionRate:
+          totalTasks.count > 0
+            ? Math.round((completedTasks.count / totalTasks.count) * 100)
+            : 0,
+      };
+    } catch (error) {
+      console.error("获取备忘录统计失败:", error);
+      throw error;
     }
   }
 }

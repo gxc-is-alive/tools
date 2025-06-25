@@ -9,6 +9,7 @@ specifiers:
   diff: ^8.0.2
   express: ^4.18.2
   form-data: ^4.0.3
+  marked: ^9.1.6
   multer: ^1.4.5-lts.1
   node-fetch: ^2.7.0
   nodemon: ^3.0.1
@@ -26,6 +27,7 @@ dependencies:
   diff: 8.0.2
   express: 4.21.2
   form-data: 4.0.3
+  marked: 9.1.6
   multer: 1.4.5-lts.2
   node-fetch: 2.7.0
   sharp: 0.32.6
@@ -1543,6 +1545,12 @@ packages:
       - supports-color
     dev: false
     optional: true
+
+  /marked/9.1.6:
+    resolution: {integrity: sha512-jcByLnIFkd5gSXZmjNvS1TlmRhCXZjIzHYlaGkPlLIekG55JDR2Z4va9tZwCiP+/RDERiNhMOFu01xd6O5ct1Q==}
+    engines: {node: '>= 16'}
+    hasBin: true
+    dev: false
 
   /math-intrinsics/1.1.0:
     resolution: {integrity: sha512-/IXtbwEk5HTPyEwyKX6hGkYXxM9nbj64B+ilVJnC/R6B0pH5G4V3b0pVbL7DBj4tkhBAppbQUlf6F6Xl9LHu1g==}
