@@ -679,8 +679,8 @@ const handleFileAdd = async (event) => {
   for (const file of files) {
     try {
       // 检查文件大小
-      if (file.size > 10 * 1024 * 1024) {
-        failedFiles.push(`${file.name} (文件过大，超过10MB)`);
+      if (file.size > 500 * 1024 * 1024) {
+        failedFiles.push(`${file.name} (文件过大，超过500MB)`);
         continue;
       }
 
