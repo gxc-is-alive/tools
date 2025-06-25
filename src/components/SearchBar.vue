@@ -701,6 +701,19 @@ const performSearch = () => {
     return;
   }
 
+  // 新增：识别 git ssh 地址并跳转
+  // 例如 git@gitlab.in.ys4fun.com:platform/client/web/pipeline.git
+  const gitSshPattern = /^git@([\w.-]+):(.*?)(?:\.git)?$/;
+  const match = searchQuery.match(gitSshPattern);
+  if (match) {
+    // 组装为 https://host/路径（去掉.git）
+    let host = match[1];
+    let path = match[2].replace(/\.git$/, "");
+    let url = `https://${host}/${path}`;
+    openUrl(url);
+    return;
+  }
+
   // 检查是否是URL
   if (isValidUrl(searchQuery)) {
     let url = searchQuery;
