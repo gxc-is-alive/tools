@@ -9,7 +9,7 @@ import FormData from "form-data";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
 import axios from "axios";
-// import databaseService from "./src/services/database.js";
+import databaseService from "./src/services/database.js";
 import { v4 as uuidv4 } from "uuid";
 import os from "os";
 
@@ -361,6 +361,312 @@ app.delete("/api/error-reports", (req, res) => {
   } catch (error) {
     console.error("清除错误报告失败:", error);
     res.status(500).json({ error: "清除失败" });
+  }
+});
+
+// 数据库相关API
+app.get("/api/memos", async (req, res) => {
+  try {
+    const memos = await databaseService.getAllMemos();
+    res.json(memos);
+  } catch (error) {
+    console.error("获取备忘录失败:", error);
+    res.status(500).json({ error: "获取备忘录失败" });
+  }
+});
+
+app.post("/api/memos", async (req, res) => {
+  try {
+    const { title, content, tags } = req.body;
+    const memo = await databaseService.createMemo(title, content, tags);
+    res.json(memo);
+  } catch (error) {
+    console.error("创建备忘录失败:", error);
+    res.status(500).json({ error: "创建备忘录失败" });
+  }
+});
+
+app.put("/api/memos/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { title, content, tags } = req.body;
+    const memo = await databaseService.updateMemo(id, title, content, tags);
+    res.json(memo);
+  } catch (error) {
+    console.error("更新备忘录失败:", error);
+    res.status(500).json({ error: "更新备忘录失败" });
+  }
+});
+
+app.delete("/api/memos/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    await databaseService.deleteMemo(id);
+    res.json({ success: true });
+  } catch (error) {
+    console.error("删除备忘录失败:", error);
+    res.status(500).json({ error: "删除备忘录失败" });
+  }
+});
+
+// 暂存室API
+app.get("/api/storage", async (req, res) => {
+  try {
+    const files = await databaseService.getAllStorageFiles();
+    res.json(files);
+  } catch (error) {
+    console.error("获取暂存室文件失败:", error);
+    res.status(500).json({ error: "获取暂存室文件失败" });
+  }
+});
+
+app.post("/api/storage", storageUpload.single("file"), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: "没有上传文件" });
+    }
+
+    const { description, tags } = req.body;
+    const file = await databaseService.createStorageFile(
+      req.file.filename,
+      req.file.originalname,
+      req.file.path,
+      req.file.size,
+      description,
+      tags
+    );
+    res.json(file);
+  } catch (error) {
+    console.error("上传文件失败:", error);
+    res.status(500).json({ error: "上传文件失败" });
+  }
+});
+
+app.delete("/api/storage/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    await databaseService.deleteStorageFile(id);
+    res.json({ success: true });
+  } catch (error) {
+    console.error("删除文件失败:", error);
+    res.status(500).json({ error: "删除文件失败" });
+  }
+});
+
+// 访问统计API
+app.get("/api/visit-stats", async (req, res) => {
+  try {
+    const stats = await databaseService.getVisitStats();
+    res.json(stats);
+  } catch (error) {
+    console.error("获取访问统计失败:", error);
+    res.status(500).json({ error: "获取访问统计失败" });
+  }
+});
+
+app.post("/api/visit-stats", async (req, res) => {
+  try {
+    const { page, timestamp } = req.body;
+    await databaseService.recordVisit(page, timestamp);
+    res.json({ success: true });
+  } catch (error) {
+    console.error("记录访问统计失败:", error);
+    res.status(500).json({ error: "记录访问统计失败" });
+  }
+});
+
+// 新的统计API - 支持前端访问统计功能
+app.post("/api/stats/record", async (req, res) => {
+  try {
+    const { sessionId, page, userAgent, screenResolution, language } = req.body;
+
+    // 记录访问数据
+    const visitData = {
+      sessionId,
+      page: page || "/",
+      userAgent: userAgent || req.headers["user-agent"],
+      screenResolution: screenResolution || "unknown",
+      language: language || "unknown",
+      ip: req.ip || req.connection.remoteAddress,
+      timestamp: new Date().toISOString(),
+      userAgent: userAgent || req.headers["user-agent"],
+    };
+
+    // 保存到数据库
+    await databaseService.recordVisit(visitData.page, visitData.timestamp);
+
+    res.json({ success: true, message: "访问记录成功" });
+  } catch (error) {
+    console.error("记录访问数据失败:", error);
+    res.status(500).json({ success: false, message: "记录失败" });
+  }
+});
+
+app.get("/api/stats", async (req, res) => {
+  try {
+    const period = parseInt(req.query.period) || 30;
+    const stats = await databaseService.getVisitStats(period);
+
+    // 格式化统计数据
+    const formattedStats = {
+      totalVisits: stats.totalVisits || 0,
+      uniqueIPs: stats.uniqueIPs || 0,
+      uniqueRegions: stats.uniqueRegions || 0,
+      todayVisits: stats.todayVisits || 0,
+      avgDuration: stats.avgDuration || 0,
+      timeDistribution: new Array(24).fill(0),
+      regionDistribution: {},
+      pageViews: {},
+      deviceStats: { desktop: 0, mobile: 0, tablet: 0 },
+      locationStats: {},
+    };
+
+    res.json({ success: true, data: formattedStats });
+  } catch (error) {
+    console.error("获取统计数据失败:", error);
+    res.status(500).json({ success: false, message: "获取数据失败" });
+  }
+});
+
+app.get("/api/stats/records", async (req, res) => {
+  try {
+    const period = parseInt(req.query.period) || 30;
+    const limit = parseInt(req.query.limit) || 50;
+
+    // 获取访问记录
+    const records = await databaseService.getVisitRecords(period, limit);
+
+    res.json({ success: true, data: records });
+  } catch (error) {
+    console.error("获取访问记录失败:", error);
+    res.status(500).json({ success: false, message: "获取记录失败" });
+  }
+});
+
+app.put("/api/stats/session/:sessionId", async (req, res) => {
+  try {
+    const { sessionId } = req.params;
+    const { duration } = req.body;
+
+    // 更新会话时长
+    await databaseService.updateSessionDuration(sessionId, duration);
+
+    res.json({ success: true, message: "会话时长更新成功" });
+  } catch (error) {
+    console.error("更新会话时长失败:", error);
+    res.status(500).json({ success: false, message: "更新失败" });
+  }
+});
+
+// URL状态检查API
+app.get("/api/check-url", async (req, res) => {
+  try {
+    const { url } = req.query;
+
+    if (!url) {
+      return res.status(400).json({
+        success: false,
+        error: "缺少URL参数",
+      });
+    }
+
+    // 验证URL格式
+    let targetUrl;
+    try {
+      targetUrl = new URL(url);
+    } catch (error) {
+      return res.status(400).json({
+        success: false,
+        error: "无效的URL格式",
+      });
+    }
+
+    // 设置请求超时
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10秒超时
+
+    try {
+      const response = await fetch(targetUrl.toString(), {
+        method: "HEAD", // 使用HEAD请求，只获取响应头
+        signal: controller.signal,
+        headers: {
+          "User-Agent":
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+        },
+      });
+
+      clearTimeout(timeoutId);
+
+      const result = {
+        success: true,
+        url: targetUrl.toString(),
+        status: response.status,
+        statusText: response.statusText,
+        isOnline: response.ok,
+        responseTime: Date.now(),
+        headers: {
+          "content-type": response.headers.get("content-type"),
+          "content-length": response.headers.get("content-length"),
+          server: response.headers.get("server"),
+          "last-modified": response.headers.get("last-modified"),
+        },
+      };
+
+      res.json(result);
+    } catch (fetchError) {
+      clearTimeout(timeoutId);
+
+      if (fetchError.name === "AbortError") {
+        res.json({
+          success: false,
+          url: targetUrl.toString(),
+          error: "请求超时",
+          isOnline: false,
+        });
+      } else {
+        res.json({
+          success: false,
+          url: targetUrl.toString(),
+          error: fetchError.message,
+          isOnline: false,
+        });
+      }
+    }
+  } catch (error) {
+    console.error("检查URL状态失败:", error);
+    res.status(500).json({
+      success: false,
+      error: "检查URL状态失败",
+    });
+  }
+});
+
+// 汇率API
+app.get("/api/exchange-rate", async (req, res) => {
+  try {
+    // 这里可以集成真实的汇率API
+    // 目前返回模拟数据
+    const rates = {
+      USD: { CNY: 7.2, EUR: 0.85, JPY: 110.5 },
+      CNY: { USD: 0.14, EUR: 0.12, JPY: 15.3 },
+      EUR: { USD: 1.18, CNY: 8.5, JPY: 130.0 },
+      JPY: { USD: 0.009, CNY: 0.065, EUR: 0.0077 },
+    };
+
+    res.json({
+      success: true,
+      data: {
+        rates,
+        timestamp: new Date().toISOString(),
+        source: "模拟数据",
+      },
+    });
+  } catch (error) {
+    console.error("获取汇率失败:", error);
+    res.status(500).json({
+      success: false,
+      error: "获取汇率失败",
+    });
   }
 });
 

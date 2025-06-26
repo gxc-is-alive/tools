@@ -618,37 +618,49 @@ class DatabaseService {
 
   async getVisitRecords(period = 30, limit = 50) {
     try {
-      const cutoff = Date.now() - period * 24 * 60 * 60 * 1000;
+      const cutoffDate = new Date();
+      cutoffDate.setDate(cutoffDate.getDate() - period);
 
       const records = await this.dbAll(
         `
         SELECT 
-          s.*,
-          GROUP_CONCAT(p.page) as pages
-        FROM visit_sessions s
-        LEFT JOIN page_views p ON s.session_id = p.session_id
-        WHERE s.start_time >= ?
-        GROUP BY s.session_id
-        ORDER BY s.start_time DESC
+          vs.session_id,
+          vs.ip,
+          vs.user_agent,
+          vs.start_time,
+          vs.end_time,
+          vs.duration,
+          vs.location_country,
+          vs.location_region,
+          vs.location_city,
+          vs.device_type,
+          pv.page,
+          pv.timestamp
+        FROM visit_sessions vs
+        LEFT JOIN page_views pv ON vs.session_id = pv.session_id
+        WHERE vs.start_time >= ?
+        ORDER BY vs.start_time DESC
         LIMIT ?
       `,
-        [cutoff, limit]
+        [cutoffDate.getTime(), limit]
       );
 
-      return records.map((record, index) => ({
-        id: index + 1,
-        timestamp: record.start_time,
+      return records.map((record) => ({
+        id: record.session_id,
+        ip: record.ip,
+        userAgent: record.user_agent,
+        startTime: record.start_time,
+        endTime: record.end_time,
+        duration: record.duration,
         region: record.location_region || "未知",
         city: record.location_city || "未知",
-        ip: record.ip,
-        page: record.pages ? record.pages.split(",")[0] : "首页",
-        duration: record.duration ? Math.round(record.duration / 1000) : 0,
-        userAgent: record.user_agent,
         device: record.device_type || "desktop",
+        page: record.page || "/",
+        timestamp: record.timestamp,
       }));
     } catch (error) {
       console.error("获取访问记录失败:", error);
-      throw error;
+      return [];
     }
   }
 
@@ -1071,6 +1083,56 @@ class DatabaseService {
     } catch (error) {
       console.error("获取备忘录统计失败:", error);
       throw error;
+    }
+  }
+
+  // 记录访问
+  async recordVisit(page, timestamp) {
+    try {
+      const sessionId = `session_${Date.now()}_${Math.random()
+        .toString(36)
+        .substr(2, 9)}`;
+
+      // 创建访问会话
+      await this.dbRun(
+        `
+        INSERT INTO visit_sessions (session_id, ip, user_agent, start_time)
+        VALUES (?, ?, ?, ?)
+      `,
+        [sessionId, "unknown", "unknown", timestamp || Date.now()]
+      );
+
+      // 记录页面访问
+      await this.dbRun(
+        `
+        INSERT INTO page_views (session_id, page, timestamp)
+        VALUES (?, ?, ?)
+      `,
+        [sessionId, page, timestamp || Date.now()]
+      );
+
+      return { success: true, sessionId };
+    } catch (error) {
+      console.error("记录访问失败:", error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // 更新会话时长
+  async updateSessionDuration(sessionId, duration) {
+    try {
+      await this.dbRun(
+        `
+        UPDATE visit_sessions 
+        SET end_time = ?, duration = ?
+        WHERE session_id = ?
+      `,
+        [Date.now(), duration, sessionId]
+      );
+      return { success: true };
+    } catch (error) {
+      console.error("更新会话时长失败:", error);
+      return { success: false, error: error.message };
     }
   }
 }
