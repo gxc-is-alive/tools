@@ -1,10 +1,10 @@
 # Stage 1: Build the application
-FROM node:18-alpine AS builder
+FROM node:18 AS builder
 
 WORKDIR /app
 
-# Install build dependencies
-RUN apk add --no-cache python3 make g++
+# Install build dependencies including sqlite3 dependencies
+RUN apt-get update && apt-get install -y python3 make g++ libvips-dev pkg-config libsqlite3-dev
 
 # Copy package.json and the lockfile (if it exists)
 COPY package.json pnpm-lock.yaml* ./
@@ -18,12 +18,12 @@ COPY . .
 RUN pnpm run build
 
 # Stage 2: Create the production image
-FROM node:18-alpine
+FROM node:18
 
 WORKDIR /app
 
-# Install runtime dependencies for SQLite
-RUN apk add --no-cache python3 make g++
+# Install runtime dependencies including sqlite3
+RUN apt-get update && apt-get install -y libvips sqlite3
 
 # Copy package.json and the lockfile again for production install
 COPY --from=builder /app/package.json ./package.json
@@ -32,6 +32,9 @@ COPY --from=builder /app/pnpm-lock.yaml* ./pnpm-lock.yaml
 # Install pnpm and ONLY production dependencies
 RUN npm install -g pnpm
 RUN pnpm install --prod
+
+# Reinstall native modules for the current platform
+RUN pnpm remove sharp sqlite3 && pnpm add sharp sqlite3
 
 # Now copy the rest of the application files
 COPY --from=builder /app/server.js ./server.js
