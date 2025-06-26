@@ -1,4 +1,15 @@
 // 前端配置文件
+
+// 自动检测当前域名和端口
+const getCurrentOrigin = () => {
+  if (typeof window !== "undefined") {
+    return window.location.origin;
+  }
+  return "http://localhost:3001"; // 默认值
+};
+
+const currentOrigin = getCurrentOrigin();
+
 export const config = {
   // 开发环境配置
   development: {
@@ -8,12 +19,12 @@ export const config = {
     downloadUrl: "http://localhost:3001/download",
   },
 
-  // 生产环境配置
+  // 生产环境配置 - 使用当前域名
   production: {
-    apiBaseUrl: "http://localhost:3001", // 生产环境可以修改为实际域名
-    uploadUrl: "http://localhost:3001/upload",
-    convertUrl: "http://localhost:3001/convert",
-    downloadUrl: "http://localhost:3001/download",
+    apiBaseUrl: currentOrigin,
+    uploadUrl: `${currentOrigin}/upload`,
+    convertUrl: `${currentOrigin}/convert`,
+    downloadUrl: `${currentOrigin}/download`,
   },
 };
 
